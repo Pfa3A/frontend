@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { Users } from "lucide-react";
+import { createLucideIcon, CreativeCommonsIcon, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "ORGANIZATION";
@@ -14,9 +14,14 @@ const TITLE = "ORGANIZATION";
 const items = [
   {
     name: "Events",
-    path: "/organization/events",
+    path: "/organizer/events",
     icon: Users,
   },
+  {
+    name: "Create Event",
+    path: "/organizer/create-event",
+    icon: CreativeCommonsIcon,
+  }
 ];
 
 export const OrganizerPageLayout: React.FC = () => {
@@ -84,24 +89,25 @@ export const OrganizerPageLayout: React.FC = () => {
           })}
         </AppSidebar>
 
-        <div className="flex-1 flex flex-col relative">
-          {/* Top header */}
-          <header className="px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                Organizer Console
-              </p>
-              <h1 className="text-sm font-semibold text-slate-900 mt-1">
-                {TITLE}
-              </h1>
-            </div>
-          </header>
+      
 
-          <main className="p-6 flex-1 overflow-auto">
-            <Outlet />
-          </main>
-        </div>
-      </SidebarProvider>
+      {/* Right content */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="sticky top-0 z-20 px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
+              Organizer Console
+            </p>
+            <h1 className="text-sm font-semibold text-slate-900 mt-1">{TITLE}</h1>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-auto p-6">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
+
     </div>
   );
 };
