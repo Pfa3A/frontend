@@ -5,7 +5,7 @@ import { OrganizerPageLayout } from './shared/OrganizerPageLayout';
 function App() {
 
   return (
-    <>
+    
       <Router>
         <Routes>
           <Route path='/organization' element={<OrganizerPageLayout />}>
@@ -13,7 +13,6 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </>
   )
 }
 
