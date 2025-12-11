@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { Users } from "lucide-react";
+import { createLucideIcon, CreativeCommonsIcon, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "ORGANIZATION";
@@ -17,6 +17,11 @@ const items = [
     path: "/organizer/events",
     icon: Users,
   },
+  {
+    name: "Create Event",
+    path: "/organizer/create-event",
+    icon: CreativeCommonsIcon,
+  }
 ];
 
 export const OrganizerPageLayout: React.FC = () => {

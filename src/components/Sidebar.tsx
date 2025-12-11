@@ -8,8 +8,7 @@ import {
   SidebarMenu,
   SidebarGroupLabel,
   SidebarGroupContent,
-  SidebarLogoutButton,
-  SidebarTrigger
+  SidebarLogoutButton
 } from "@/components/ui/sidebar";
 
 export function AppSidebar({
