@@ -17,7 +17,7 @@ const SignUpForm: React.FC = () => {
     password: "",
     firstName: "",
     lastName: "",
-    phoneNumber: "",
+    username:""
   });
   const [error, setError] = useState<string>();
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -105,13 +105,13 @@ const SignUpForm: React.FC = () => {
       />
 
       <TextField
-        label="Numéro de téléphone"
+        label="Username"
         variant="outlined"
         fullWidth
         margin="normal"
-        type="tel"
-        value={user.phoneNumber}
-        name="phoneNumber"
+        type="text"
+        value={user.username}
+        name="username"
         onChange={handleChange}
         required
       />

@@ -1,6 +1,5 @@
 // src/contexts/AuthContext.tsx
 
-import api from "@/api";
 import type { UserLoginRequest, UserSignUpRequest } from "@/types/auth";
 import type { User } from "@/types/user";
 import React, {
@@ -10,6 +9,7 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
+import api from "@/api";
 
 export interface AuthContextType {
   user?: User;
@@ -103,9 +103,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     setToken(response.data);
     localStorage.setItem("token", response.data);
-    api.defaults.headers.common["Authorization"] = `Bearer ${response.data}`;
+    //api.defaults.headers.common["Authorization"] = `Bearer ${response.data}`;
 
-    const userResponse = await api.get<User>(baseUrl+"/me");
+    const userResponse = await api.get<User>(baseUrl+"me");
     setUser(userResponse.data);
     console.log("Logged in user:", userResponse.data);
     localStorage.setItem("user", JSON.stringify(userResponse.data));
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const signup = async (userSignup: UserSignUpRequest) => {
     try {
       setLoading(true);
-      await api.post(baseUrl+"/sign-up", userSignup);
+      await api.post(baseUrl, userSignup);
       setToken("");
     } catch (err: any) {
       setToken("");
@@ -153,7 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         return;
       }
 
-      const response = await api.get<User>(baseUrl+"/me");
+      const response = await api.get<User>(baseUrl+"me");
       console.log("Fetched user:", response.data);
 
       setUser(response.data);

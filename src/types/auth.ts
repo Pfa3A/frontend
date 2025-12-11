@@ -8,5 +8,5 @@ export  interface UserSignUpRequest{
     password:string;
     firstName:string;
     lastName:string;
-    phoneNumber:string;
+    username:string;
 }
