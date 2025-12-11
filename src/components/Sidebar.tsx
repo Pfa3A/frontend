@@ -11,9 +11,7 @@ import {
   SidebarLogoutButton,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-
-import { PanelLeftIcon } from "lucide-react";
-
+import Logo from "@/assets/images/bus_logo.png";
 
 export function AppSidebar({
   title,
@@ -33,45 +31,21 @@ export function AppSidebar({
       `}
     >
       {/* Header */}
-      {/* Header */}
-<SidebarHeader className="relative z-10 border-b border-slate-200 px-5 py-4 bg-white">
-  <div className="flex items-center justify-between">
-    {/* Left: Logo + Title */}
-    <div className="flex items-center gap-3">
-      <div
-        className="
-          flex h-10 w-10 items-center justify-center
-          rounded-xl border border-slate-200
-          bg-slate-50
-          text-slate-900 font-bold text-sm
-        "
-      >
-        OC
-      </div>
-
-      <div className="flex flex-col">
-        <span className="text-sm font-semibold tracking-tight text-slate-900">
-          OnChain Tickets
-        </span>
-        <span className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-          {title}
-        </span>
-      </div>
-    </div>
-
-    {/* Right: Collapse / Expand */}
-    <SidebarTrigger
-      className="
-        text-slate-500
-        hover:text-slate-900
-        hover:bg-slate-100
-      "
-    >
-      <PanelLeftIcon className="h-4 w-4" />
-    </SidebarTrigger>
-  </div>
-</SidebarHeader>
-
+      <SidebarHeader className="border-b px-5 py-4 bg-white/60 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 border border-slate-200 backdrop-blur">
+            <img src={Logo} alt="FastBus logo" className="h-7 w-auto" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight text-slate-900">
+              FastBus
+            </span>
+            <span className="text-[11px] uppercase tracking-wide text-[#0071BC]">
+              {title}
+            </span>
+          </div>
+        </div>
+      </SidebarHeader>
 
       {/* Navigation */}
       <SidebarContent className="relative z-10 px-3 py-4 bg-white">
