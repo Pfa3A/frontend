@@ -18,13 +18,13 @@ type EventDto = {
   coverImageUrl?: string | null;
 };
 
-// ✅ MOCK DATA (replace later with backend)
+// ✅ DONNÉES MOCK (à remplacer plus tard par le backend)
 const MOCK_EVENTS: EventDto[] = [
   {
     id: 1,
     title: "Casablanca Web3 Summit",
     description:
-      "A premium conference about NFT ticketing, blockchain UX, and secure on-chain validation workflows.",
+      "Une conférence premium sur la billetterie NFT, l’UX blockchain et les workflows de validation on-chain.",
     startDate: "2026-01-18T09:00:00Z",
     endDate: "2026-01-18T18:00:00Z",
     status: "PUBLISHED",
@@ -36,19 +36,19 @@ const MOCK_EVENTS: EventDto[] = [
     id: 2,
     title: "Rabat Dev Night",
     description:
-      "Hands-on workshops (React + Spring Boot + Web3) with live demos and QR ticket validation.",
+      "Ateliers pratiques (React + Spring Boot + Web3) avec démos live et validation des tickets via QR.",
     startDate: "2026-01-22T18:30:00Z",
     endDate: "2026-01-22T22:30:00Z",
     status: "PUBLISHED",
-    venueName: "ENSIAS Auditorium",
+    venueName: "Auditorium ENSIAS",
     city: "Rabat",
     country: "Morocco",
   },
   {
     id: 3,
-    title: "Tetouan Music Festival",
+    title: "Festival de Musique de Tétouan",
     description:
-      "A multi-stage festival with NFT-backed tickets, anti-fraud QR entry, and resale-ready metadata.",
+      "Festival multi-scènes avec tickets NFT, entrée anti-fraude via QR, et métadonnées prêtes pour la revente.",
     startDate: "2026-02-02T15:00:00Z",
     endDate: "2026-02-02T23:30:00Z",
     status: "DRAFT",
@@ -56,18 +56,18 @@ const MOCK_EVENTS: EventDto[] = [
     city: "Tetouan",
     country: "Morocco",
   },
-  // Generate more so pagination looks real:
+  // Générer plus pour que la pagination soit réaliste :
   ...Array.from({ length: 2 }).map((_, i) => {
     const id = i + 4;
-    const cities = ["Casablanca", "Rabat", "Tangier", "Tetouan", "Marrakesh"];
-    const venues = ["Main Hall", "Expo Center", "Open Air Stage", "Conference Room", "Arena"];
+    const cities = ["Casablanca", "Rabat", "Tanger", "Tétouan", "Marrakech"];
+    const venues = ["Salle Principale", "Expo Center", "Scène Open Air", "Salle Conférence", "Arena"];
     const statuses: EventStatus[] = ["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"];
 
     return {
       id,
-      title: `Event #${id} — Experience Night`,
+      title: `Événement #${id} — Experience Night`,
       description:
-        "Simple, professional mock event description. Later we’ll connect it to your Spring Boot API.",
+        "Description mock simple et professionnelle. Plus tard, on connectera ça à ton API Spring Boot.",
       startDate: new Date(Date.now() + id * 86400000).toISOString(),
       endDate: new Date(Date.now() + id * 86400000 + 3 * 3600000).toISOString(),
       status: statuses[id % statuses.length],
@@ -79,7 +79,7 @@ const MOCK_EVENTS: EventDto[] = [
 ];
 
 function formatDateRange(start?: string, end?: string) {
-  if (!start && !end) return "Date TBD";
+  if (!start && !end) return "Date à confirmer";
   const fmt = (iso: string) =>
     new Intl.DateTimeFormat(undefined, {
       weekday: "short",
@@ -97,7 +97,8 @@ function formatDateRange(start?: string, end?: string) {
 
 function statusPill(status?: string) {
   const s = (status ?? "UNKNOWN").toUpperCase();
-  const base = "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
+  const base =
+    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
   switch (s) {
     case "PUBLISHED":
       return `${base} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200`;
@@ -130,12 +131,13 @@ export const EventsListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const pageParam = Number(searchParams.get("page") ?? "1");
-  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+  const currentPage =
+    Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageIndex = currentPage - 1;
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
 
-  // ✅ Search + Filter (client-side for mock)
+  // ✅ Recherche + filtre (côté client pour le mock)
   const filtered = useMemo(() => {
     const q = (searchParams.get("q") ?? "").trim().toLowerCase();
     if (!q) return MOCK_EVENTS;
@@ -146,7 +148,7 @@ export const EventsListPage = () => {
     });
   }, [searchParams]);
 
-  // ✅ Pagination (client-side for mock)
+  // ✅ Pagination (côté client pour le mock)
   const totalElements = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
   const canPrev = currentPage > 1;
@@ -157,7 +159,7 @@ export const EventsListPage = () => {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, pageIndex]);
 
-  const title = totalElements > 0 ? `Events (${totalElements})` : "Events";
+  const title = totalElements > 0 ? `Événements (${totalElements})` : "Événements";
 
   function goToPage(p: number) {
     const next = Math.min(Math.max(1, p), totalPages);
@@ -178,7 +180,7 @@ export const EventsListPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* subtle premium background decoration */}
+      {/* décor de fond premium subtil */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div
           className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-40"
@@ -206,10 +208,14 @@ export const EventsListPage = () => {
       <header className="mx-auto max-w-6xl px-4 pt-10 pb-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold tracking-wide text-slate-500">NFT Ticketing</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">{title}</h1>
+            <p className="text-sm font-semibold tracking-wide text-slate-500">
+              Billetterie NFT
+            </p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+              {title}
+            </h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Mock data for now. Click an event to navigate to the details page route.
+              Données mock pour le moment. Clique sur un événement pour aller vers la page de détails.
             </p>
           </div>
 
@@ -219,14 +225,14 @@ export const EventsListPage = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search events by title, venue, city…"
+                placeholder="Rechercher par titre, lieu, ville…"
                 className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
               />
               <button
                 type="submit"
                 className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-[0.99]"
               >
-                Search
+                Rechercher
               </button>
             </div>
           </form>
@@ -234,12 +240,16 @@ export const EventsListPage = () => {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pb-12">
-        {/* List */}
+        {/* Liste */}
         <section className="grid gap-4">
           {pagedEvents.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
-              <h3 className="text-base font-semibold text-slate-900">No events found</h3>
-              <p className="mt-2 text-sm text-slate-600">Try changing your search query.</p>
+              <h3 className="text-base font-semibold text-slate-900">
+                Aucun événement trouvé
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Essaie de modifier ta recherche.
+              </p>
               <button
                 onClick={() => {
                   setQuery("");
@@ -247,7 +257,7 @@ export const EventsListPage = () => {
                 }}
                 className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50"
               >
-                Clear search
+                Effacer la recherche
               </button>
             </div>
           ) : (
@@ -286,17 +296,22 @@ export const EventsListPage = () => {
                         </div>
                       </div>
 
-                      <p className="mt-2 text-sm text-slate-600">{clampText(ev.description, 160)}</p>
+                      <p className="mt-2 text-sm text-slate-600">
+                        {clampText(ev.description, 160)}
+                      </p>
 
                       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                         <span className="rounded-full bg-slate-50 px-3 py-1 ring-1 ring-slate-200">
-                          📍 {ev.venueName ?? "Venue TBD"}
+                          📍 {ev.venueName ?? "Lieu à confirmer"}
                         </span>
                         <span className="rounded-full bg-slate-50 px-3 py-1 ring-1 ring-slate-200">
-                          {ev.city ? `🏙️ ${ev.city}` : "🏙️ City TBD"}
+                          {ev.city ? `🏙️ ${ev.city}` : "🏙️ Ville à confirmer"}
                         </span>
                         <span className="ml-auto inline-flex items-center gap-1 font-semibold text-slate-900">
-                          View details <span className="transition group-hover:translate-x-0.5">→</span>
+                          Voir les détails{" "}
+                          <span className="transition group-hover:translate-x-0.5">
+                            →
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -311,7 +326,9 @@ export const EventsListPage = () => {
         {pagedEvents.length > 0 && (
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-slate-600">
-              Page <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
+              Page{" "}
+              <span className="font-semibold text-slate-900">{currentPage}</span>{" "}
+              sur{" "}
               <span className="font-semibold text-slate-900">{totalPages}</span>
             </div>
 
@@ -321,7 +338,7 @@ export const EventsListPage = () => {
                 onClick={() => goToPage(currentPage - 1)}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                ← Previous
+                ← Précédent
               </button>
 
               <button
@@ -329,7 +346,7 @@ export const EventsListPage = () => {
                 onClick={() => goToPage(currentPage + 1)}
                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Next →
+                Suivant →
               </button>
             </div>
           </div>
@@ -337,4 +354,4 @@ export const EventsListPage = () => {
       </main>
     </div>
   );
-}
+};

@@ -1,15 +1,13 @@
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserSignUpRequest } from "@/types/auth";
-import {
-  Button,
-  Typography,
-  Link,
-  Box,
-  TextField,
-  Grid,
-} from "@mui/material";
+import type React from "react";
 import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+
+import { useAuth } from "@/contexts/AuthContext";
+import type { UserSignUpRequest } from "@/types/auth";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const SignUpForm: React.FC = () => {
   const [user, setUser] = useState<UserSignUpRequest>({
@@ -17,10 +15,12 @@ const SignUpForm: React.FC = () => {
     password: "",
     firstName: "",
     lastName: "",
-    username:""
+    username: "",
   });
+
   const [error, setError] = useState<string>();
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -42,131 +42,137 @@ const SignUpForm: React.FC = () => {
     }
 
     setError(undefined);
+    setLoading(true);
 
     try {
       await signup(user);
       navigate("/login");
     } catch (err: any) {
-      console.log("Error during sign up: ", err);
-      const backendMessage =
-        err?.response?.data?.message || err?.response?.data;
+      const backendMessage = err?.response?.data?.message || err?.response?.data;
       setError(
         backendMessage ||
           "L'inscription a échoué. Veuillez vérifier vos informations et réessayer."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Error */}
       {error && (
-        <Typography color="error" mb={2} textAlign="center" variant="body2">
+        <div
+          className={cn(
+            "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2",
+            "text-sm text-rose-700 text-center"
+          )}
+        >
           {error}
-        </Typography>
+        </div>
       )}
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Prénom"
-            variant="outlined"
-            fullWidth
+      {/* First/Last name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-slate-700">Prénom</label>
+          <Input
             type="text"
-            value={user.firstName}
             name="firstName"
+            value={user.firstName}
             onChange={handleChange}
+            placeholder="Votre prénom"
             required
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Nom"
-            variant="outlined"
-            fullWidth
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-slate-700">Nom</label>
+          <Input
             type="text"
-            value={user.lastName}
             name="lastName"
+            value={user.lastName}
             onChange={handleChange}
+            placeholder="Votre nom"
             required
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
-      <TextField
-        label="Adresse e-mail"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="email"
-        value={user.email}
-        name="email"
-        onChange={handleChange}
-        required
-      />
+      {/* Email */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">
+          Adresse e-mail
+        </label>
+        <Input
+          type="email"
+          name="email"
+          value={user.email}
+          onChange={handleChange}
+          placeholder="ex: utilisateur@email.com"
+          required
+        />
+      </div>
 
-      <TextField
-        label="Username"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="text"
-        value={user.username}
-        name="username"
-        onChange={handleChange}
-        required
-      />
+      {/* Username */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">Username</label>
+        <Input
+          type="text"
+          name="username"
+          value={user.username}
+          onChange={handleChange}
+          placeholder="ex: zakariae_anna"
+          required
+        />
+      </div>
 
-      <TextField
-        label="Mot de passe (sécurisé)"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="password"
-        value={user.password}
-        name="password"
-        onChange={handleChange}
-        required
-      />
+      {/* Password */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">
+          Mot de passe (sécurisé)
+        </label>
+        <Input
+          type="password"
+          name="password"
+          value={user.password}
+          onChange={handleChange}
+          placeholder="••••••••"
+          required
+        />
+      </div>
 
-      <TextField
-        label="Confirmer le mot de passe"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="password"
-        value={confirmPassword}
-        name="confirmPassword"
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-      />
+      {/* Confirm password */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">
+          Confirmer le mot de passe
+        </label>
+        <Input
+          type="password"
+          name="confirmPassword"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          required
+        />
+      </div>
 
-      <Button
-        type="submit"
-        variant="contained"
-        fullWidth
-        sx={{
-          mt: 2,
-          py: 1.1,
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 9999,
-        }}
-      >
-        Créer mon compte sécurisé
+      {/* Submit */}
+      <Button type="submit" className="w-full" size="lg" disabled={loading}>
+        {loading ? "Création en cours..." : "Créer mon compte sécurisé"}
       </Button>
 
-      <Typography mt={3} textAlign="center" variant="body2">
+      {/* Footer */}
+      <p className="pt-2 text-center text-xs text-slate-600">
         Vous avez déjà un compte ?{" "}
-        <Link
-          component={RouterLink}
+        <RouterLink
           to="/login"
-          underline="hover"
-          sx={{ fontWeight: 500 }}
+          className="font-semibold text-slate-900 hover:underline"
         >
           Se connecter
-        </Link>
-      </Typography>
-    </Box>
+        </RouterLink>
+      </p>
+    </form>
   );
 };
 

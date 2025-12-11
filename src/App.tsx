@@ -13,7 +13,7 @@ function App() {
         <Routes>
           <Route index element={<LoginPage />} path='login' />
           <Route index element={<SignUpPage />} path='sign-up' />
-          <Route path='/organization' element={<OrganizerPageLayout />}>
+          <Route path='organizer' element={<OrganizerPageLayout />}>
             <Route path="events" element={<EventsListPage />} />
           </Route>
         </Routes>

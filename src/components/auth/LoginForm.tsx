@@ -1,15 +1,13 @@
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserLoginRequest } from "@/types/auth";
 import type React from "react";
 import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Link,
-} from "@mui/material";
+
+import { useAuth } from "@/contexts/AuthContext";
+import type { UserLoginRequest } from "@/types/auth";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const LoginForm: React.FC = () => {
   const [user, setUser] = useState<UserLoginRequest>({
@@ -32,83 +30,87 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(undefined);
     setLoading(true);
 
     try {
       const redirectPath = await login(user);
-      console.log("Redirecting to: ", redirectPath);
       navigate(redirectPath);
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
           "Échec de la connexion. Vérifiez vos identifiants ou réessayez."
       );
-      console.log("Erreur pendant la connexion : ", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, fontFamily: "Inter, sans-serif" }}>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Error */}
       {error && (
-        <Typography color="error" mb={2} textAlign="center" variant="body2">
+        <div
+          className={cn(
+            "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2",
+            "text-sm text-rose-700 text-center"
+          )}
+        >
           {error}
-        </Typography>
+        </div>
       )}
 
-      <TextField
-        label="Adresse e-mail"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="email"
-        value={user.email}
-        name="email"
-        onChange={handleChange}
-        required
-      />
-      <TextField
-        label="Mot de passe"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="password"
-        value={user.password}
-        name="password"
-        onChange={handleChange}
-        required
-      />
+      {/* Email */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">
+          Adresse e-mail
+        </label>
+        <Input
+          type="email"
+          name="email"
+          placeholder="ex: utilisateur@email.com"
+          value={user.email}
+          onChange={handleChange}
+          required
+        />
+      </div>
 
+      {/* Password */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-slate-700">
+          Mot de passe
+        </label>
+        <Input
+          type="password"
+          name="password"
+          placeholder="Votre mot de passe"
+          value={user.password}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      {/* Submit */}
       <Button
         type="submit"
-        variant="contained"
-        fullWidth
-        sx={{
-          mt: 2,
-          py: 1.1,
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 9999,
-        }}
+        className="w-full"
+        size="lg"
         disabled={loading}
       >
         {loading ? "Connexion sécurisée..." : "Se connecter"}
       </Button>
 
-      <Typography mt={3} textAlign="center" variant="body2">
+      {/* Footer */}
+      <p className="pt-2 text-center text-xs text-slate-600">
         Vous n’avez pas encore de compte ?{" "}
-        <Link
-          component={RouterLink}
+        <RouterLink
           to="/sign-up"
-          underline="hover"
-          sx={{ fontWeight: 500 }}
+          className="font-semibold text-slate-900 hover:underline"
         >
           Créer un compte
-        </Link>
-      </Typography>
-    </Box>
+        </RouterLink>
+      </p>
+    </form>
   );
 };
 
