@@ -1,82 +1,14 @@
-import React, { useMemo, useState } from "react";
+import { getEvents } from "@/services/eventService";
+import type { EventDto, EventStatus } from "@/types/event";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const PAGE_SIZE = 10;
 
-type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELLED" | "ENDED" | string;
 
-type EventDto = {
-  id: number | string;
-  title: string;
-  description?: string;
-  startDate?: string; // ISO
-  endDate?: string; // ISO
-  status?: EventStatus;
-  venueName?: string;
-  city?: string;
-  country?: string;
-  coverImageUrl?: string | null;
-};
 
 // ✅ DONNÉES MOCK (à remplacer plus tard par le backend)
-const MOCK_EVENTS: EventDto[] = [
-  {
-    id: 1,
-    title: "Casablanca Web3 Summit",
-    description:
-      "Une conférence premium sur la billetterie NFT, l’UX blockchain et les workflows de validation on-chain.",
-    startDate: "2026-01-18T09:00:00Z",
-    endDate: "2026-01-18T18:00:00Z",
-    status: "PUBLISHED",
-    venueName: "Anfa Convention Center",
-    city: "Casablanca",
-    country: "Morocco",
-  },
-  {
-    id: 2,
-    title: "Rabat Dev Night",
-    description:
-      "Ateliers pratiques (React + Spring Boot + Web3) avec démos live et validation des tickets via QR.",
-    startDate: "2026-01-22T18:30:00Z",
-    endDate: "2026-01-22T22:30:00Z",
-    status: "PUBLISHED",
-    venueName: "Auditorium ENSIAS",
-    city: "Rabat",
-    country: "Morocco",
-  },
-  {
-    id: 3,
-    title: "Festival de Musique de Tétouan",
-    description:
-      "Festival multi-scènes avec tickets NFT, entrée anti-fraude via QR, et métadonnées prêtes pour la revente.",
-    startDate: "2026-02-02T15:00:00Z",
-    endDate: "2026-02-02T23:30:00Z",
-    status: "DRAFT",
-    venueName: "City Arena",
-    city: "Tetouan",
-    country: "Morocco",
-  },
-  // Générer plus pour que la pagination soit réaliste :
-  ...Array.from({ length: 2 }).map((_, i) => {
-    const id = i + 4;
-    const cities = ["Casablanca", "Rabat", "Tanger", "Tétouan", "Marrakech"];
-    const venues = ["Salle Principale", "Expo Center", "Scène Open Air", "Salle Conférence", "Arena"];
-    const statuses: EventStatus[] = ["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"];
 
-    return {
-      id,
-      title: `Événement #${id} — Experience Night`,
-      description:
-        "Description mock simple et professionnelle. Plus tard, on connectera ça à ton API Spring Boot.",
-      startDate: new Date(Date.now() + id * 86400000).toISOString(),
-      endDate: new Date(Date.now() + id * 86400000 + 3 * 3600000).toISOString(),
-      status: statuses[id % statuses.length],
-      venueName: venues[id % venues.length],
-      city: cities[id % cities.length],
-      country: "Morocco",
-    };
-  }),
-];
 
 function formatDateRange(start?: string, end?: string) {
   if (!start && !end) return "Date à confirmer";
@@ -101,6 +33,7 @@ function statusPill(status?: string) {
     "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
   switch (s) {
     case "PUBLISHED":
+    case "ACTIVE":
       return `${base} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200`;
     case "DRAFT":
       return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
@@ -126,9 +59,12 @@ function buildCoverGradient(seed: string) {
   return `linear-gradient(135deg, hsl(${h} 72% 92%), hsl(${h2} 72% 96%))`;
 }
 
-export const EventsListPage = () => {
+export const AllEventsListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<EventDto[]>([]);
 
   const pageParam = Number(searchParams.get("page") ?? "1");
   const currentPage =
@@ -139,14 +75,16 @@ export const EventsListPage = () => {
 
   // ✅ Recherche + filtre (côté client pour le mock)
   const filtered = useMemo(() => {
-    const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-    if (!q) return MOCK_EVENTS;
+    const q = query.trim().toLowerCase();
+    if (!q) return events;
 
-    return MOCK_EVENTS.filter((e) => {
-      const hay = `${e.title} ${e.venueName ?? ""} ${e.city ?? ""}`.toLowerCase();
-      return hay.includes(q);
+    return events.filter((e) => {
+        const hay = `${e.name
+        } ${e.venueName ?? ""} ${e.city ?? ""}`.toLowerCase();
+        return hay.includes(q);
     });
-  }, [searchParams]);
+    }, [events, query]);
+
 
   // ✅ Pagination (côté client pour le mock)
   const totalElements = filtered.length;
@@ -177,6 +115,23 @@ export const EventsListPage = () => {
     if (query.trim()) sp.set("q", query.trim());
     setSearchParams(sp);
   }
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getEvents();
+        setEvents(data);
+      } catch (err: any) {
+        setError(err.message || "Erreur lors du chargement des événements");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -270,7 +225,7 @@ export const EventsListPage = () => {
               return (
                 <button
                   key={String(ev.id)}
-                  onClick={() => navigate(`/events/${ev.id}`)}
+                  onClick={() => navigate(`/client/events/${ev.id}`)}
                   className="group rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-[0_8px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_50px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                 >
                   <div className="flex gap-4">
