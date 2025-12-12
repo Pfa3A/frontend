@@ -19,7 +19,8 @@ export const orderTickets = async (request: OrderTicketRequest): Promise<TicketO
 
 export const buyTickets = async (request: PaymentRequest): Promise<TicketPaymentResponse> => {
     try {
-        const response = await api.post("api/v1/tickets/order", request);
+        const response = await api.post("api/v1/tickets/buy", request);
+        console.log('response: ',response);
         const data: TicketPaymentResponse = response.data;
         return data;
 

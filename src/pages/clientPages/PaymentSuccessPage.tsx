@@ -47,7 +47,7 @@ const PaymentSuccessPage: React.FC = () => {
 
             if (i > 0) doc.addPage(); 
             doc.setFontSize(20);
-            doc.text(`Ticket FastBus #${i + 1}`, 20, 20);
+            doc.text(`Ticket  #${i + 1}`, 20, 20);
             doc.addImage(qrDataURL, "PNG", 20, 40, 50, 50);
         }
 

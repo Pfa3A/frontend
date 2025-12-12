@@ -14,6 +14,8 @@ import CheckoutForm from './pages/clientPages/PaymentPage';
 import { stripePromise } from './shared/stripe';
 import { Elements } from '@stripe/react-stripe-js';
 import PaymentSuccessPage from './pages/clientPages/PaymentSuccessPage';
+import { HomePageLayout } from './shared/HomeLayoutPage';
+import { HomePage } from './pages/HomePage';
 
 
 function App() {
@@ -24,6 +26,10 @@ function App() {
       <Routes>
         <Route index element={<LoginPage />} path='login' />
         <Route index element={<SignUpPage />} path='sign-up' />
+        <Route element={<HomePageLayout />} path=''>
+          <Route index element={<HomePage />} />
+        </Route>
+
         <Route path='organizer' element={<OrganizerPageLayout />}>
           <Route path="events" element={<EventsListPage />} />
           <Route path="create-event" element={<CreateEventPage />} />
