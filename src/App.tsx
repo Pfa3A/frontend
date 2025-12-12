@@ -1,13 +1,15 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { OrganizerPageLayout } from './shared/OrganizerPageLayout';
-import { EventsListPage } from './pages/EventPages/EventListPage/EventsListPage';
+import {  OrganizerPageLayout } from './shared/OrganazierPageLayout';
 import LoginPage from './pages/auth/LoginPage';
 import SignUpPage from './pages/auth/SignUpPage';
 import CreateEventPage from './pages/EventPages/CreateEvenetPage';
-import { ClientPageLayout } from './shared/ClientPageLayout';
 import { AllEventsListPage } from './pages/EventPages/AllEventsListPage';
 import { EventDetailsPage } from './pages/EventPages/EventDetailsPage';
+import ProfilePage from './pages/clientPages/ProfilePage';
+import { MyEventDetailsPage } from './pages/EventPages/MyEventDetailsPage';
+import { EventsListPage } from './pages/EventPages/EventListPage';
+import { ClientPageLayout } from './shared/ClientLayoutPage';
 
 function App() {
 
@@ -20,6 +22,16 @@ function App() {
           <Route path='organizer' element={<OrganizerPageLayout />}>
             <Route path="events" element={<EventsListPage />} />
             <Route path="create-event" element={<CreateEventPage />} />
+            <Route path="events/:eventId" element={<MyEventDetailsPage />} />
+          </Route>
+          <Route path='client' element={<ClientPageLayout />}>
+            <Route path="events" element={<AllEventsListPage />} />
+            <Route path="events/:eventId" element={<EventDetailsPage />} />
+          </Route>
+
+          <Route path='client' element={<ClientPageLayout/>}>
+            <Route path="events"  />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
           <Route path='client' element={<ClientPageLayout />}>
             <Route path="events" element={<AllEventsListPage />} />

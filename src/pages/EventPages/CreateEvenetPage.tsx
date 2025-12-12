@@ -1,26 +1,20 @@
 import React, { useState } from "react";
-
-type CreateEventDto = {
-  name: string;
-  description: string;
-  date: string;
-  venueId: number;
-  ticketPrice: number;
-  totalSeats: number;
-  maxTicketsPerPerson: number;
-};
-
-type CreateVenueDto = {
-  name: string;
-  addressLine1: string;
-  city: string;
-  country: string;
-};
+import type { CreateEventDto } from "../../types/Event";
+import type { CreateVenueDto, CreatedVenueDto } from "../../types/Venue";
+import { EventService, VenueService } from "../../services/event.service";
+import { addVenue, createEvent } from "@/services/eventService";
 
 export default function CreateEventPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+  const [isSubmittingVenue, setIsSubmittingVenue] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
+  const [venueError, setVenueError] = useState<string | null>(null);
+
   const [success, setSuccess] = useState(false);
+  const [venueSuccess, setVenueSuccess] = useState(false);
+
+  const [createdVenue, setCreatedVenue] = useState<CreatedVenueDto | null>(null);
 
   const [eventData, setEventData] = useState({
     name: "",
@@ -31,9 +25,9 @@ export default function CreateEventPage() {
     maxTicketsPerPerson: 1,
   });
 
-  const [venueData, setVenueData] = useState({
+  const [venueData, setVenueData] = useState<CreateVenueDto>({
     name: "",
-    addressLine1: "",
+    street: "",
     city: "",
     country: "",
   });
@@ -48,104 +42,79 @@ export default function CreateEventPage() {
     }));
   };
 
-  const handleVenueChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleVenueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setVenueData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setVenueData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const validateEvent = () => {
+    if (!eventData.name.trim()) return "Le nom de l’événement est obligatoire";
+    if (!eventData.description.trim()) return "La description de l’événement est obligatoire";
+    if (!eventData.date) return "La date de l’événement est obligatoire";
+    if (!createdVenue?.id) return "Veuillez d’abord créer un lieu (le lieu est obligatoire)";
+    if (eventData.ticketPrice < 0) return "Le prix du ticket ne peut pas être négatif";
+    if (eventData.totalSeats <= 0) return "Le nombre total de places doit être supérieur à 0";
+    if (eventData.maxTicketsPerPerson <= 0)
+      return "Le nombre max de tickets par personne doit être supérieur à 0";
+    return null;
+  };
+
+  const validateVenue = () => {
+    if (!venueData.name.trim()) return "Le nom du lieu est obligatoire";
+    if (!venueData.street.trim()) return "L’adresse (rue) est obligatoire";
+    if (!venueData.city.trim()) return "La ville est obligatoire";
+    if (!venueData.country.trim()) return "Le pays est obligatoire";
+    return null;
+  };
+
+  const handleCreateVenue = async () => {
+    setVenueError(null);
+    setVenueSuccess(false);
+    setCreatedVenue(null);
+
+    const vErr = validateVenue();
+    if (vErr) {
+      setVenueError(vErr);
+      return;
+    }
+
+    setIsSubmittingVenue(true);
+    try {
+      const v = await addVenue(venueData);
+      setCreatedVenue(v);
+      setVenueSuccess(true);
+    } catch (err) {
+      setVenueError(err instanceof Error ? err.message : "Une erreur s’est produite");
+    } finally {
+      setIsSubmittingVenue(false);
+    }
+  };
+
+  const handleCreateEvent = async () => {
     setError(null);
     setSuccess(false);
 
-    // Validation
-    if (!eventData.name.trim()) {
-      setError("Event name is required");
-      return;
-    }
-    if (!eventData.description.trim()) {
-      setError("Event description is required");
-      return;
-    }
-    if (!eventData.date) {
-      setError("Event date is required");
-      return;
-    }
-    if (!venueData.name.trim()) {
-      setError("Venue name is required");
-      return;
-    }
-    if (!venueData.addressLine1.trim()) {
-      setError("Street address is required");
-      return;
-    }
-    if (!venueData.city.trim()) {
-      setError("City is required");
-      return;
-    }
-    if (!venueData.country.trim()) {
-      setError("Country is required");
-      return;
-    }
-    if (eventData.totalSeats <= 0) {
-      setError("Total seats must be greater than 0");
-      return;
-    }
-    if (eventData.maxTicketsPerPerson <= 0) {
-      setError("Max tickets per person must be greater than 0");
+    const eErr = validateEvent();
+    if (eErr) {
+      setError(eErr);
       return;
     }
 
-    setIsSubmitting(true);
-
+    setIsSubmittingEvent(true);
     try {
-      // Step 1: Create venue first
-      const venueResponse = await fetch("/api/v1/venue", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(venueData),
-      });
-
-      if (!venueResponse.ok) {
-        throw new Error("Failed to create venue");
-      }
-
-      const createdVenue = await venueResponse.json();
-      const venueId = createdVenue.id;
-
-      // Step 2: Create event with the venue ID
-      const eventPayload: CreateEventDto = {
+      const payload: CreateEventDto = {
         name: eventData.name,
         description: eventData.description,
         date: eventData.date,
-        venueId: venueId,
+        venueId: createdVenue!.id, // injecté automatiquement
         ticketPrice: eventData.ticketPrice,
         totalSeats: eventData.totalSeats,
         maxTicketsPerPerson: eventData.maxTicketsPerPerson,
       };
 
-      const eventResponse = await fetch("/api/v1/event", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(eventPayload),
-      });
+      await createEvent(payload);
 
-      if (!eventResponse.ok) {
-        throw new Error("Failed to create event");
-      }
-
-      const createdEvent = await eventResponse.json();
       setSuccess(true);
-      
-      // Reset form after success
       setTimeout(() => {
         setEventData({
           name: "",
@@ -155,52 +124,51 @@ export default function CreateEventPage() {
           totalSeats: 0,
           maxTicketsPerPerson: 1,
         });
-        setVenueData({
-          name: "",
-          addressLine1: "",
-          city: "",
-          country: "",
-        });
         setSuccess(false);
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "Une erreur s’est produite");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingEvent(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Background decoration */}
+      {/* Décoration de fond */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div
           className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-40"
           style={{
-            background: "radial-gradient(circle, rgba(59,130,246,0.18), rgba(59,130,246,0))",
+            background:
+              "radial-gradient(circle, rgba(59,130,246,0.18), rgba(59,130,246,0))",
           }}
         />
         <div
           className="absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-35"
           style={{
-            background: "radial-gradient(circle, rgba(99,102,241,0.16), rgba(99,102,241,0))",
+            background:
+              "radial-gradient(circle, rgba(99,102,241,0.16), rgba(99,102,241,0))",
           }}
         />
       </div>
 
       <header className="mx-auto max-w-4xl px-4 pt-10 pb-6">
         <div>
-          <p className="text-sm font-semibold tracking-wide text-slate-500">NFT Ticketing</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">Create New Event</h1>
+          <p className="text-sm font-semibold tracking-wide text-slate-500">
+            Billetterie NFT
+          </p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+            Créer un nouvel événement
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Fill out the form below to create a new event with NFT-backed tickets.
+            Créez d’abord un lieu (ci-dessous), puis créez votre événement.
           </p>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 pb-12">
         <div className="space-y-6">
-          {/* Success/Error Messages */}
           {error && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
               <p className="text-sm font-semibold text-rose-700">{error}</p>
@@ -209,27 +177,56 @@ export default function CreateEventPage() {
 
           {success && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="text-sm font-semibold text-emerald-700">✓ Event created successfully!</p>
+              <p className="text-sm font-semibold text-emerald-700">
+                ✓ Événement créé avec succès !
+              </p>
             </div>
           )}
 
-          {/* Event Details Section */}
+          {/* Détails de l’événement */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white font-bold">
                 1
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Event Details</h2>
-                <p className="text-sm text-slate-600">Basic information about your event</p>
+                <h2 className="text-lg font-bold text-slate-900">
+                  Détails de l’événement
+                </h2>
+                <p className="text-sm text-slate-600">
+                  Le lieu est défini automatiquement après sa création.
+                </p>
               </div>
             </div>
 
+            {createdVenue ? (
+              <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">
+                  Lieu sélectionné : {createdVenue.name} (ID {createdVenue.id})
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreatedVenue(null);
+                    setVenueSuccess(false);
+                  }}
+                  className="mt-2 text-sm font-semibold text-slate-900 underline"
+                >
+                  Changer de lieu
+                </button>
+              </div>
+            ) : (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-800">
+                  Veuillez créer un lieu ci-dessous avant de créer l’événement.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-6">
-              {/* Event Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-slate-900">
-                  Event Name *
+                  Nom de l’événement *
                 </label>
                 <input
                   type="text"
@@ -237,12 +234,10 @@ export default function CreateEventPage() {
                   name="name"
                   value={eventData.name}
                   onChange={handleEventChange}
-                  placeholder="e.g., Casablanca Web3 Summit"
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label htmlFor="description" className="block text-sm font-semibold text-slate-900">
                   Description *
@@ -253,15 +248,13 @@ export default function CreateEventPage() {
                   value={eventData.description}
                   onChange={handleEventChange}
                   rows={4}
-                  placeholder="Provide a detailed description of your event..."
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
-              {/* Date & Time */}
               <div>
                 <label htmlFor="date" className="block text-sm font-semibold text-slate-900">
-                  Event Date & Time *
+                  Date et heure *
                 </label>
                 <input
                   type="datetime-local"
@@ -273,10 +266,9 @@ export default function CreateEventPage() {
                 />
               </div>
 
-              {/* Ticket Price */}
               <div>
                 <label htmlFor="ticketPrice" className="block text-sm font-semibold text-slate-900">
-                  Ticket Price (MAD) *
+                  Prix du ticket (MAD) *
                 </label>
                 <div className="relative mt-2">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
@@ -290,18 +282,15 @@ export default function CreateEventPage() {
                     step="0.01"
                     value={eventData.ticketPrice}
                     onChange={handleEventChange}
-                    placeholder="0.00"
                     className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-16 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
               </div>
 
-              {/* Grid for seats and max tickets */}
               <div className="grid gap-6 sm:grid-cols-2">
-                {/* Total Seats */}
                 <div>
                   <label htmlFor="totalSeats" className="block text-sm font-semibold text-slate-900">
-                    Total Seats *
+                    Nombre total de places *
                   </label>
                   <input
                     type="number"
@@ -310,15 +299,16 @@ export default function CreateEventPage() {
                     min="1"
                     value={eventData.totalSeats}
                     onChange={handleEventChange}
-                    placeholder="e.g., 500"
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
 
-                {/* Max Tickets Per Person */}
                 <div>
-                  <label htmlFor="maxTicketsPerPerson" className="block text-sm font-semibold text-slate-900">
-                    Max Tickets Per Person *
+                  <label
+                    htmlFor="maxTicketsPerPerson"
+                    className="block text-sm font-semibold text-slate-900"
+                  >
+                    Max tickets par personne *
                   </label>
                   <input
                     type="number"
@@ -327,7 +317,6 @@ export default function CreateEventPage() {
                     min="1"
                     value={eventData.maxTicketsPerPerson}
                     onChange={handleEventChange}
-                    placeholder="e.g., 4"
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
@@ -335,23 +324,38 @@ export default function CreateEventPage() {
             </div>
           </div>
 
-          {/* Venue Details Section */}
+          {/* Informations du lieu */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white font-bold">
                 2
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Venue Information</h2>
-                <p className="text-sm text-slate-600">Where will your event take place?</p>
+                <h2 className="text-lg font-bold text-slate-900">Informations du lieu</h2>
+                <p className="text-sm text-slate-600">
+                  Créez un lieu, puis l’événement l’utilisera automatiquement.
+                </p>
               </div>
             </div>
 
+          {venueError && (
+              <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <p className="text-sm font-semibold text-rose-700">{venueError}</p>
+              </div>
+            )}
+
+            {venueSuccess && createdVenue && (
+              <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <p className="text-sm font-semibold text-emerald-700">
+                  ✓ Lieu créé avec succès ! (ID {createdVenue.id})
+                </p>
+              </div>
+            )}
+
             <div className="space-y-6">
-              {/* Venue Name */}
               <div>
                 <label htmlFor="venueName" className="block text-sm font-semibold text-slate-900">
-                  Venue Name *
+                  Nom du lieu *
                 </label>
                 <input
                   type="text"
@@ -359,32 +363,28 @@ export default function CreateEventPage() {
                   name="name"
                   value={venueData.name}
                   onChange={handleVenueChange}
-                  placeholder="e.g., Anfa Convention Center"
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
-              {/* Street Address */}
               <div>
-                <label htmlFor="addressLine1" className="block text-sm font-semibold text-slate-900">
-                  Street Address *
+                <label htmlFor="street" className="block text-sm font-semibold text-slate-900">
+                  Adresse (rue) *
                 </label>
                 <input
                   type="text"
-                  id="addressLine1"
-                  name="addressLine1"
-                  value={venueData.addressLine1}
+                  id="street"
+                  name="street"
+                  value={venueData.street}
                   onChange={handleVenueChange}
-                  placeholder="e.g., Boulevard de la Corniche"
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                 />
               </div>
 
-              {/* City and Country */}
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
                   <label htmlFor="city" className="block text-sm font-semibold text-slate-900">
-                    City *
+                    Ville *
                   </label>
                   <input
                     type="text"
@@ -392,14 +392,13 @@ export default function CreateEventPage() {
                     name="city"
                     value={venueData.city}
                     onChange={handleVenueChange}
-                    placeholder="e.g., Casablanca"
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="country" className="block text-sm font-semibold text-slate-900">
-                    Country *
+                    Pays *
                   </label>
                   <input
                     type="text"
@@ -407,15 +406,43 @@ export default function CreateEventPage() {
                     name="country"
                     value={venueData.country}
                     onChange={handleVenueChange}
-                    placeholder="e.g., Morocco"
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                   />
                 </div>
               </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVenueData({
+                      name: "",
+                      street: "",
+                      city: "",
+                      country: "",
+                    });
+                    setVenueError(null);
+                    setVenueSuccess(false);
+                    setCreatedVenue(null);
+                  }}
+                  className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 active:scale-[0.99]"
+                >
+                  Effacer le lieu
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCreateVenue}
+                  disabled={isSubmittingVenue}
+                  className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]"
+                >
+                  {isSubmittingVenue ? "Création du lieu..." : "Créer le lieu"}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Form Actions */}
+          {/* Actions */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
@@ -430,24 +457,28 @@ export default function CreateEventPage() {
                 });
                 setVenueData({
                   name: "",
-                  addressLine1: "",
+                  street: "",
                   city: "",
                   country: "",
                 });
                 setError(null);
+                setVenueError(null);
                 setSuccess(false);
+                setVenueSuccess(false);
+                setCreatedVenue(null);
               }}
               className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 active:scale-[0.99]"
             >
-              Clear Form
+              Tout effacer
             </button>
+
             <button
               type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
+              onClick={handleCreateEvent}
+              disabled={isSubmittingEvent || !createdVenue}
               className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.99]"
             >
-              {isSubmitting ? "Creating Event..." : "Create Event"}
+              {isSubmittingEvent ? "Création de l’événement..." : "Créer l’événement"}
             </button>
           </div>
         </div>

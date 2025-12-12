@@ -13,3 +13,34 @@ export type EventDto = {
   country?: string;
   coverImageUrl?: string | null;
 };
+
+export type VenueDto = {
+  id: number;
+  name: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  country: string;
+  postalCode: string;
+};
+
+export type OrganizerDto = {
+  id: string;
+  companyName: string;
+  phoneNumber: string;
+  website?: string;
+  contactEmail: string;
+};
+
+export type EventDetailsDto = {
+  id: number;
+  name: string;
+  description: string;
+  date: string; // ISO
+  ticketPrice: number;
+  totalSeats: number;
+  maxTicketsPerPerson: number;
+  status: EventStatus;
+  venue: VenueDto;
+  organizer: OrganizerDto;
+};

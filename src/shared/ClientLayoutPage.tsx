@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { Users } from "lucide-react";
+import { createLucideIcon, CreativeCommonsIcon, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "CLIENT";
@@ -17,6 +17,11 @@ const items = [
     path: "/client/events",
     icon: Users,
   },
+  {
+    name: "My Profile",
+    path: "/client/profile",
+    icon: CreativeCommonsIcon,
+  }
 ];
 
 export const ClientPageLayout: React.FC = () => {
@@ -84,22 +89,25 @@ export const ClientPageLayout: React.FC = () => {
           })}
         </AppSidebar>
 
-       {/* Right content */}
-             <div className="flex-1 flex flex-col h-screen overflow-hidden">
-               <header className="sticky top-0 z-20 px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between">
-                 <div>
-                   <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                     Client Console
-                   </p>
-                   <h1 className="text-sm font-semibold text-slate-900 mt-1">{TITLE}</h1>
-                 </div>
-               </header>
-       
-               <main className="flex-1 overflow-auto p-6">
-                 <Outlet />
-               </main>
-             </div>
-      </SidebarProvider>
+      
+
+      {/* Right content */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="sticky top-0 z-20 px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
+              Client Console
+            </p>
+            <h1 className="text-sm font-semibold text-slate-900 mt-1">{TITLE}</h1>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-auto p-6">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
+
     </div>
   );
 };

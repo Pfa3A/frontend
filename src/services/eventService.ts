@@ -1,6 +1,8 @@
 import type { User } from "@/types/user";
 import api from "@/api";
-import type { EventDto } from "@/types/event";
+import type { EventDetailsDto, EventDto } from "@/types/event";
+import type { CreateEventDto, MyEventDetailsDto, MyEventDto } from "@/types/Event";
+import type { CreatedVenueDto, CreateVenueDto } from "@/types/Venue";
 
 
 export const getEvents = async (): Promise<EventDto[]> => {
@@ -13,9 +15,9 @@ export const getEvents = async (): Promise<EventDto[]> => {
     }
 }
 
-export const getOrganizerEvents = async (): Promise<EventDto[]> => {
+export const getOrganizerEvents = async (): Promise<MyEventDto[]> => {
     try {
-        const response = await api.get<EventDto[]>("/api/v1/event/me")
+        const response = await api.get<MyEventDto[]>("/api/v1/event/me")
         return response.data;
     }
     catch (err: any) {
@@ -23,15 +25,50 @@ export const getOrganizerEvents = async (): Promise<EventDto[]> => {
     }
 }
 
-export const getEventDetails = async (): Promise<EventDto[]> => {
+export const getEventDetails = async (eventId:string
+): Promise<EventDetailsDto> => {
     try {
-        const response = await api.get<EventDto[]>("/api/v1/event/me")
+        const id = Number(eventId);
+        const response = await api.get<EventDetailsDto>(`/api/v1/event/${id}`)
         return response.data;
     }
     catch (err: any) {
         throw err;
     }
 }
+
+
+export const getEventDetails2 = async (eventId:string
+): Promise<MyEventDetailsDto> => {
+    try {
+        const id = Number(eventId);
+        const response = await api.get<MyEventDetailsDto>(`/api/v1/event/${id}`)
+        return response.data;
+    }
+    catch (err: any) {
+        throw err;
+    }
+}
+
+
+export const addVenue = async (venue: CreateVenueDto): Promise<CreatedVenueDto> => {
+    try {
+        const response =  await api.post<CreatedVenueDto>("/api/venues", venue);
+        return response.data;
+    }
+    catch (err: any) {
+        throw err;
+    }
+}
+
+export const createEvent = async (dto: CreateEventDto): Promise<unknown> => {
+  try {
+    const response = await api.post<unknown>("/api/v1/event", dto);
+    return response.data;
+  } catch (err: any) {
+    throw err;
+  }
+};
 
 export const addDriver = async (user: User): Promise<User> => {
     try {

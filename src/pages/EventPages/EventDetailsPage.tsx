@@ -1,38 +1,11 @@
+import { getEventDetails } from "@/services/eventService";
+import type { EventDetailsDto } from "@/types/event";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
 
-type VenueDto = {
-  id: number;
-  name: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  country: string;
-  postalCode: string;
-};
 
-type OrganizerDto = {
-  id: string;
-  companyName: string;
-  phoneNumber: string;
-  website?: string;
-  contactEmail: string;
-};
-
-type EventDetailsDto = {
-  id: number;
-  name: string;
-  description: string;
-  date: string; // ISO
-  ticketPrice: number;
-  totalSeats: number;
-  maxTicketsPerPerson: number;
-  status: EventStatus;
-  venue: VenueDto;
-  organizer: OrganizerDto;
-};
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -98,13 +71,10 @@ export const EventDetailsPage = () => {
         setError(null);
         
         // TODO: Replace with your actual API base URL
-        const response = await fetch(`/api/v1/event/${eventId}`);
+        const data = await getEventDetails(eventId);
         
-        if (!response.ok) {
-          throw new Error(`Failed to fetch event: ${response.statusText}`);
-        }
         
-        const data: EventDetailsDto = await response.json();
+        
         setEvent(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
