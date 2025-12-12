@@ -22,7 +22,6 @@ export type MyEventDto = {
 };
 
 
-export type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
 
 export type VenueDto = {
   id: number;
