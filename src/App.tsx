@@ -10,6 +10,10 @@ import ProfilePage from './pages/clientPages/ProfilePage';
 import { MyEventDetailsPage } from './pages/EventPages/MyEventDetailsPage';
 import { EventsListPage } from './pages/EventPages/EventListPage';
 import { ClientPageLayout } from './shared/ClientLayoutPage';
+import CheckoutForm from './pages/clientPages/PaymentPage';
+import { stripePromise } from './shared/stripe';
+import { Elements } from '@stripe/react-stripe-js';
+
 
 function App() {
 
@@ -36,6 +40,12 @@ function App() {
           <Route path='client' element={<ClientPageLayout />}>
             <Route path="events" element={<AllEventsListPage />} />
             <Route path="events/:eventId" element={<EventDetailsPage />} />
+            <Route
+            path="/events/:id/buy-ticket"
+            element={<Elements stripe={stripePromise}>
+              <CheckoutForm />
+            </Elements>}
+          />
           </Route>
         </Routes>
       </Router>

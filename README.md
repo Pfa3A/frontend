@@ -71,3 +71,8 @@ export default defineConfig([
   },
 ])
 ```
+
+``` 
+npm install @stripe/react-stripe-js @stripe/stripe-js
+
+```

@@ -1,4 +1,5 @@
 import { getEventDetails } from "@/services/eventService";
+import { orderTickets } from "@/services/ticket.service";
 import type { EventDetailsDto } from "@/types/event";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,6 +7,17 @@ import { useNavigate, useParams } from "react-router-dom";
 type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
 
 
+export interface TicketOrderResponse {
+  message: string,
+  numberOfTicketsThatCanBeBought: number,
+  orderId: string | null
+}
+
+export interface OrderTicketRequest {
+  eventId: number,
+  userId: string,
+  numberOfTickets: number
+}
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -53,7 +65,7 @@ function buildCoverGradient(seed: string) {
 export const EventDetailsPage = () => {
   const navigate = useNavigate();
   const { eventId } = useParams<{ eventId: string }>();
-  
+
   const [event, setEvent] = useState<EventDetailsDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,12 +81,12 @@ export const EventDetailsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // TODO: Replace with your actual API base URL
         const data = await getEventDetails(eventId);
-        
-        
-        
+
+
+
         setEvent(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -86,10 +98,19 @@ export const EventDetailsPage = () => {
     fetchEvent();
   }, [eventId]);
 
-  const handleBuyTicket = () => {
+  const handleBuyTicket = async () => {
     if (!event) return;
+    const user = JSON.parse(localStorage.getItem('user') || "{}");
+    console.log("user: ", user);
+    const request: OrderTicketRequest = { eventId: Number(eventId), userId: user.id, numberOfTickets: 1 };
+    const response: TicketOrderResponse = await orderTickets(request);
+    if (response.message === "You can buy your tickets" && response.numberOfTicketsThatCanBeBought > 0 && response.orderId !== null) {
+      navigate(
+        `/client/events/${event.id}/buy-ticket?orderId=${response.orderId}&tickets=${response.numberOfTicketsThatCanBeBought}&price=${event.ticketPrice}`
+      );
+    }
     // TODO: Navigate to ticket purchase page or open modal
-    navigate(`/events/${event.id}/buy-ticket`);
+
   };
 
   if (loading) {
