@@ -39,15 +39,15 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
         <Route path='client' element={<ClientPageLayout />}>
-          <Route path="/events" element={<AllEventsListPage />} />
-          <Route path="/events/:eventId" element={<EventDetailsPage />} />
+          <Route path="events" element={<AllEventsListPage />} />
+          <Route path="events/:eventId" element={<EventDetailsPage />} />
           <Route
-            path="/events/:id/buy-ticket"
+            path="events/:id/buy-ticket"
             element={<Elements stripe={stripePromise}>
               <CheckoutForm />
             </Elements>}
           />
-          <Route path="/events/:eventId/tickets-success" element={<PaymentSuccessPage />} />
+          <Route path="events/:eventId/tickets-success" element={<PaymentSuccessPage />} />
         </Route>
       </Routes>
     </Router>
