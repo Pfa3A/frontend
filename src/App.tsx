@@ -16,6 +16,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import PaymentSuccessPage from './pages/clientPages/PaymentSuccessPage';
 import { HomePageLayout } from './shared/HomeLayoutPage';
 import { HomePage } from './pages/HomePage';
+import { OrdersPage } from './pages/clientPages/OrdersPage';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
         <Route path='client' element={<ClientPageLayout />}>
           <Route path="events" element={<AllEventsListPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
+          <Route path="orders" element={<OrdersPage />} />
           <Route
             path="events/:id/buy-ticket"
             element={<Elements stripe={stripePromise}>
