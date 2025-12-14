@@ -18,6 +18,7 @@ import { HomePageLayout } from './shared/HomeLayoutPage';
 import { HomePage } from './pages/HomePage';
 import { TicketTransferPage } from './pages/clientPages/TransferPage';
 import { MyTicketsPage } from './pages/clientPages/TicketsPage';
+import { OrdersPage } from './pages/clientPages/OrdersPage';
 
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="tickets" element={<MyTicketsPage />} />
            <Route path="transfer-ticket" element={<TicketTransferPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
+          <Route path="orders" element={<OrdersPage />} />
           <Route
             path="events/:id/buy-ticket"
             element={<Elements stripe={stripePromise}>

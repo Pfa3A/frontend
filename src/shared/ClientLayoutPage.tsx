@@ -6,7 +6,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { createLucideIcon, CreativeCommonsIcon, Users } from "lucide-react";
+import { createLucideIcon, CreativeCommonsIcon, icons, Menu, Send, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "CLIENT";
@@ -25,12 +25,18 @@ const items = [
   {
     name: "Tickets",
     path: "/client/tickets",
-    icon: Users,
+    icon: Menu,
   },
   {
     name: "Transfer Tickets",
     path: "/client/transfer-ticket",
-    icon: Users,
+    icon: Send,
+  },
+  {
+
+     name: "Orders",
+    path: "/client/orders",
+    icon: CreativeCommonsIcon
   }
 ];
 
