@@ -36,7 +36,7 @@ export function AppSidebar({
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold tracking-tight text-slate-900">
-              FastBus
+              OnChain Tickets
             </span>
             <span className="text-[11px] uppercase tracking-wide text-[#0071BC]">
               {title}

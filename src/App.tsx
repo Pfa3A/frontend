@@ -16,6 +16,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import PaymentSuccessPage from './pages/clientPages/PaymentSuccessPage';
 import { HomePageLayout } from './shared/HomeLayoutPage';
 import { HomePage } from './pages/HomePage';
+import { TicketTransferPage } from './pages/clientPages/TransferPage';
+import { MyTicketsPage } from './pages/clientPages/TicketsPage';
 
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
         </Route>
         <Route path='client' element={<ClientPageLayout />}>
           <Route path="events" element={<AllEventsListPage />} />
+          <Route path="tickets" element={<MyTicketsPage />} />
+           <Route path="transfer-ticket" element={<TicketTransferPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
           <Route
             path="events/:id/buy-ticket"

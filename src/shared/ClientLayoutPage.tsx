@@ -21,6 +21,16 @@ const items = [
     name: "My Profile",
     path: "/client/profile",
     icon: CreativeCommonsIcon,
+  },
+  {
+    name: "Tickets",
+    path: "/client/tickets",
+    icon: Users,
+  },
+  {
+    name: "Transfer Tickets",
+    path: "/client/transfer-ticket",
+    icon: Users,
   }
 ];
 
