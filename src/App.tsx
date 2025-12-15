@@ -38,19 +38,14 @@ function App() {
           <Route path="create-event" element={<CreateEventPage />} />
           <Route path="events/:eventId" element={<MyEventDetailsPage />} />
         </Route>
-        <Route path='client' element={<ClientPageLayout />}>
-          <Route path="events" element={<AllEventsListPage />} />
-          <Route path="events/:eventId" element={<EventDetailsPage />} />
-        </Route>
+
+
 
         <Route path='client' element={<ClientPageLayout />}>
-          <Route path="events" />
           <Route path="profile" element={<ProfilePage />} />
-        </Route>
-        <Route path='client' element={<ClientPageLayout />}>
           <Route path="events" element={<AllEventsListPage />} />
           <Route path="tickets" element={<MyTicketsPage />} />
-           <Route path="transfer-ticket" element={<TicketTransferPage />} />
+          <Route path="transfer-ticket" element={<TicketTransferPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route

@@ -15,33 +15,34 @@ export interface OrderDto {
   numberOfTickets: number;
 }
 
-function buildCoverGradient(seed: string) {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
-  const h2 = (h + 24) % 360;
-  return `linear-gradient(135deg, hsl(${h} 72% 92%), hsl(${h2} 72% 96%))`;
-}
 
-function statusPill(status: string) {
-  const base =
-    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
-  switch (status) {
-    case "OPEN":
-      return `${base} bg-amber-50 text-amber-700 ring-1 ring-amber-200`;
-    case "CLOSED":
-      return `${base} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200`;
-    case "CANCELLED":
-      return `${base} bg-rose-50 text-rose-700 ring-1 ring-rose-200`;
-    default:
-      return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
-  }
-}
 
 export const OrdersPage = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  function buildCoverGradient(seed: string) {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
+    const h2 = (h + 24) % 360;
+    return `linear-gradient(135deg, hsl(${h} 72% 92%), hsl(${h2} 72% 96%))`;
+  }
+
+  function statusPill(status: string) {
+    const base =
+      "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
+    switch (status) {
+      case "OPEN":
+        return `${base} bg-amber-50 text-amber-700 ring-1 ring-amber-200`;
+      case "CLOSED":
+        return `${base} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200`;
+      case "CANCELLED":
+        return `${base} bg-rose-50 text-rose-700 ring-1 ring-rose-200`;
+      default:
+        return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,13 +58,11 @@ export const OrdersPage = () => {
         }
 
         const ordersData = await getOpenOrdersByUserId(userId);
-
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
+        console.log(ordersData)
         // Calculate totalPrice from numberOfTickets * ticketPrice
-        ordersData.forEach((o: OrderDto) => {
-          o.totalPrice = o.numberOfTickets * o.ticketPrice;
-        });
+       
 
-        setOrders(ordersData);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Erreur lors du chargement des commandes");
@@ -83,8 +82,29 @@ export const OrdersPage = () => {
       price: String(totalPrice),
     });
 
-    navigate(`/client/events/${order.eventId}/checkout?${params}`);
+    navigate(`/client/events/${order.eventId}/buy-ticket?${params}`);
   };
+
+  if (loading) return <p>Chargement des commandes...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
+
+  if (orders.length === 0) {
+    return (
+      <div className="text-center p-10">
+        <h2 className="text-xl font-semibold">Aucune commande disponible</h2>
+        <p className="mt-2 text-gray-500">
+          Vous n'avez pas encore de commandes. Découvrez nos événements pour acheter vos billets.
+        </p>
+        <button
+          className="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500"
+          onClick={() => navigate("/client/events")}
+        >
+          Explorer les événements
+        </button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -201,13 +221,13 @@ export const OrdersPage = () => {
                         <div className="flex justify-between text-sm">
                           <span className="text-slate-600">Nombre de billets</span>
                           <span className="font-semibold text-slate-900">
-                            {order.numberOfTickets} × {order.ticketPrice.toFixed(2)} MAD
+                            {order.numberOfTickets} × {(order.ticketPrice ?? 0).toFixed(2)} MAD
                           </span>
                         </div>
                         <div className="flex justify-between text-sm pt-2 border-t border-slate-200">
                           <span className="font-medium text-slate-900">Total</span>
                           <span className="text-lg font-bold text-slate-900">
-                            {(order.numberOfTickets * order.ticketPrice).toFixed(2)} MAD
+                            {((order.numberOfTickets ?? 0) * (order.ticketPrice ?? 0)).toFixed(2)} MAD
                           </span>
                         </div>
                       </div>
