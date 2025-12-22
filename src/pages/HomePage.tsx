@@ -105,7 +105,7 @@ export const HomePage = () => {
 
               <div className="mt-4 flex flex-col gap-3">
                 <Link
-                  to="/signup"
+                  to="/sign-up"
                   className="inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium bg-slate-900 text-white shadow-sm hover:bg-slate-800 transition"
                 >
                   Créer un compte
