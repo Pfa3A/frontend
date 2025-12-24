@@ -19,6 +19,9 @@ import { HomePage } from './pages/HomePage';
 import { TicketTransferPage } from './pages/clientPages/TransferPage';
 import { MyTicketsPage } from './pages/clientPages/TicketsPage';
 import { OrdersPage } from './pages/clientPages/OrdersPage';
+import { AdminPageLayout } from './shared/AdminLayoutPage';
+import { UsersListPage } from './pages/AdminPages/UsersListPage';
+import { CreateOrganizerPage } from './pages/AdminPages/CreateOrganizerPage';
 
 
 function App() {
@@ -39,8 +42,6 @@ function App() {
           <Route path="events/:eventId" element={<MyEventDetailsPage />} />
         </Route>
 
-
-
         <Route path='client' element={<ClientPageLayout />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="events" element={<AllEventsListPage />} />
@@ -55,6 +56,11 @@ function App() {
             </Elements>}
           />
           <Route path="events/:eventId/tickets-success" element={<PaymentSuccessPage />} />
+        </Route>
+
+        <Route path='admin' element={<AdminPageLayout />}>
+          <Route path="users" element={<UsersListPage />} />
+          <Route path="create-organizer" element={<CreateOrganizerPage />} />
         </Route>
       </Routes>
     </Router>
