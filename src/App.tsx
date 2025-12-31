@@ -19,6 +19,7 @@ import { HomePage } from './pages/HomePage';
 import { TicketTransferPage } from './pages/clientPages/TransferPage';
 import { MyTicketsPage } from './pages/clientPages/TicketsPage';
 import { OrdersPage } from './pages/clientPages/OrdersPage';
+import DashboardPage from './pages/DashboardPage';
 import { AdminPageLayout } from './shared/AdminLayoutPage';
 import { UsersListPage } from './pages/AdminPages/UsersListPage';
 import { CreateOrganizerPage } from './pages/AdminPages/CreateOrganizerPage';
@@ -37,6 +38,7 @@ function App() {
         </Route>
 
         <Route path='organizer' element={<OrganizerPageLayout />}>
+          <Route path="dashboard" element={<DashboardPage/>} />
           <Route path="events" element={<EventsListPage />} />
           <Route path="create-event" element={<CreateEventPage />} />
           <Route path="events/:eventId" element={<MyEventDetailsPage />} />

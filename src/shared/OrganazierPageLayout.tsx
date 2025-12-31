@@ -6,12 +6,17 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { createLucideIcon, CreativeCommonsIcon, Users } from "lucide-react";
+import { CreativeCommonsIcon, LayoutDashboard, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "ORGANIZATION";
 
 const items = [
+  {
+    name: "Dashboard",
+    path: "/organizer/dashboard",
+    icon: LayoutDashboard
+  },
   {
     name: "Events",
     path: "/organizer/events",
