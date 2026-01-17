@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { Logo } from "@/components/Logo";
 
 const items = [
   { name: "Se connecter", path: "/login" },
@@ -6,22 +7,18 @@ const items = [
 
 export const ClientHomePageHeader = () => {
   const navigate = useNavigate();
-  
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-100">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo + brand */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-3 focus:outline-none"
+          className="focus:outline-none"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-lg shadow-md">
-            TC
-          </div>
-          <span className="text-xl font-semibold tracking-tight text-slate-900">
-            TicketChain
-          </span>
+          <Logo />
         </button>
+
 
         {/* Nav */}
         <nav className="flex items-center gap-6 text-sm font-medium text-slate-700">

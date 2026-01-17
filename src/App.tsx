@@ -25,20 +25,28 @@ import { UsersListPage } from './pages/AdminPages/UsersListPage';
 import { CreateOrganizerPage } from './pages/AdminPages/CreateOrganizerPage';
 
 
+import { AuthLayout } from './shared/AuthLayout';
+
 function App() {
 
   return (
 
     <Router>
       <Routes>
-        <Route index element={<LoginPage />} path='login' />
-        <Route index element={<SignUpPage />} path='sign-up' />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+        </Route>
+
+        {/* We keep the index route as login for now if desired, OR we make Home the index */}
+        {/* Let's make Home the index as it makes more sense for a landing page */}
         <Route element={<HomePageLayout />} path=''>
           <Route index element={<HomePage />} />
         </Route>
 
+
         <Route path='organizer' element={<OrganizerPageLayout />}>
-          <Route path="dashboard" element={<DashboardPage/>} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="events" element={<EventsListPage />} />
           <Route path="create-event" element={<CreateEventPage />} />
           <Route path="events/:eventId" element={<MyEventDetailsPage />} />

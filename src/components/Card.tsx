@@ -1,9 +1,14 @@
 import type { ReactNode } from "react"
+import { cn } from "@/lib/utils"
 
+interface CardProps {
+    children: ReactNode;
+    className?: string;
+}
 
-export const Card = ({children}:{children: ReactNode}) =>{
+export const Card = ({ children, className }: CardProps) => {
     return (
-        <div className="p-16 rounded-2xl bg-white">
+        <div className={cn("rounded-2xl bg-white", className)}>
             {children}
         </div>
     )
