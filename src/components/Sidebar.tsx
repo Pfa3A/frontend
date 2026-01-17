@@ -11,6 +11,8 @@ import {
   SidebarLogoutButton
 } from "@/components/ui/sidebar";
 
+import Logo from "@/assets/images/logo.png";
+
 export function AppSidebar({
   title,
   children,
@@ -32,7 +34,7 @@ export function AppSidebar({
       <SidebarHeader className="border-b px-5 py-4 bg-white/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 border border-slate-200 backdrop-blur">
-            
+            <img src={Logo} alt="FastBus logo" className="h-7 w-auto" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold tracking-tight text-slate-900">
