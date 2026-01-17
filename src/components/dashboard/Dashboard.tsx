@@ -41,37 +41,11 @@ const Dashboard = () => {
     fetchMetrics();
   }, []);
 
-  const monthNames = [
-    "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
-    "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"
-  ];
+
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Décor de fond premium */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div
-          className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-40"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(59,130,246,0.18), rgba(59,130,246,0))",
-          }}
-        />
-        <div
-          className="absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-35"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(99,102,241,0.16), rgba(99,102,241,0))",
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full blur-3xl opacity-25"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(16,185,129,0.14), rgba(16,185,129,0))",
-          }}
-        />
-      </div>
+
 
       <header className="mx-auto max-w-6xl px-4 pt-10 pb-6">
         <div>
@@ -245,7 +219,7 @@ const Dashboard = () => {
                       const daysAgo = recentSales.monthSales.length - idx - 1;
                       const date = new Date();
                       date.setDate(date.getDate() - daysAgo);
-                      
+
                       return {
                         date: new Intl.DateTimeFormat('fr-MA', {
                           day: '2-digit',
@@ -258,14 +232,14 @@ const Dashboard = () => {
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis 
-                      dataKey="date" 
+                    <XAxis
+                      dataKey="date"
                       stroke="#94a3b8"
                       style={{ fontSize: '11px' }}
                       tickMargin={8}
                       interval={Math.floor(recentSales.monthSales.length / 6)}
                     />
-                    <YAxis 
+                    <YAxis
                       stroke="#94a3b8"
                       style={{ fontSize: '11px' }}
                       tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
@@ -288,10 +262,10 @@ const Dashboard = () => {
                       }}
                       labelStyle={{ fontWeight: 600, color: '#0f172a' }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#6366f1" 
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#6366f1"
                       strokeWidth={2}
                       dot={{ fill: '#6366f1', r: 3 }}
                       activeDot={{ r: 5, fill: '#4f46e5' }}

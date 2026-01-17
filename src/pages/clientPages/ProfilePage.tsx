@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { Card } from "@/components/Card";
 import api from "@/api";
 
 type UserProfile = {
@@ -25,7 +26,7 @@ export default function ProfilePage() {
         const fetchUserProfile = async () => {
             try {
                 const userData: any = JSON.parse(localStorage.getItem('user') || '{}');
-                console.log("userData: ",userData)
+                console.log("userData: ", userData)
                 console.log("userId: ", userData.id);
 
                 const response = await api.get(`api/v1/users/me`);
@@ -49,16 +50,7 @@ export default function ProfilePage() {
         fetchUserProfile();
     }, []);
 
-    const downloadQRCode = () => {
-        const canvas = document.getElementById("qr-code") as HTMLCanvasElement;
-        if (canvas) {
-            const url = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.download = `${user.firstName}_${user.lastName}_QR.png`;
-            link.href = url;
-            link.click();
-        }
-    };
+
 
     if (isLoading) {
         return (
@@ -71,20 +63,7 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-white">
             {/* Background decoration */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div
-                    className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-40"
-                    style={{
-                        background: "radial-gradient(circle, rgba(59,130,246,0.18), rgba(59,130,246,0))",
-                    }}
-                />
-                <div
-                    className="absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-35"
-                    style={{
-                        background: "radial-gradient(circle, rgba(99,102,241,0.16), rgba(99,102,241,0))",
-                    }}
-                />
-            </div>
+
 
             <header className="mx-auto max-w-4xl px-4 pt-10 pb-6">
                 <div>
@@ -106,7 +85,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Profile Information Section */}
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
+                    <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
                         <div className="mb-6 flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white font-bold">
                                 1
@@ -158,10 +137,10 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* QR Code Section */}
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
+                    <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
                         <div className="mb-6 flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white font-bold">
                                 2
@@ -184,7 +163,7 @@ export default function ProfilePage() {
                                 level="H"
                             />
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </main>
         </div>

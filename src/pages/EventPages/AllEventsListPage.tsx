@@ -1,5 +1,6 @@
 import { getEvents } from "@/services/eventService";
-import type { EventDto, EventStatus } from "@/types/event";
+import type { EventDto } from "@/types/event";
+import { Card } from "@/components/Card";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -61,8 +62,6 @@ function buildCoverGradient(seed: string) {
 export const AllEventsListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<EventDto[]>([]);
 
   const pageParam = Number(searchParams.get("page") ?? "1");
@@ -78,10 +77,10 @@ export const AllEventsListPage = () => {
     if (!q) return events;
 
     return events.filter((e) => {
-        const hay = `${e.name} ${e.venueName ?? ""} ${e.city ?? ""}`.toLowerCase();
-        return hay.includes(q);
+      const hay = `${e.name} ${e.venueName ?? ""} ${e.city ?? ""}`.toLowerCase();
+      return hay.includes(q);
     });
-    }, [events, query]);
+  }, [events, query]);
 
 
   // ✅ Pagination (côté client pour le mock)
@@ -116,15 +115,11 @@ export const AllEventsListPage = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      setLoading(true);
-      setError(null);
       try {
         const data = await getEvents();
         setEvents(data);
       } catch (err: any) {
-        setError(err.message || "Erreur lors du chargement des événements");
-      } finally {
-        setLoading(false);
+        console.error(err);
       }
     };
     fetchEvents();
@@ -134,29 +129,7 @@ export const AllEventsListPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* décor de fond premium subtil */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div
-          className="absolute -top-32 -left-24 h-80 w-80 rounded-full blur-3xl opacity-40"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(59,130,246,0.18), rgba(59,130,246,0))",
-          }}
-        />
-        <div
-          className="absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-35"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(99,102,241,0.16), rgba(99,102,241,0))",
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full blur-3xl opacity-25"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(16,185,129,0.14), rgba(16,185,129,0))",
-          }}
-        />
-      </div>
+
 
       <header className="mx-auto max-w-6xl px-4 pt-10 pb-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -221,12 +194,11 @@ export const AllEventsListPage = () => {
                 : buildCoverGradient(seed);
 
               return (
-                <button
-                  key={String(ev.id)}
-                  onClick={() => navigate(`/client/events/${ev.id}`)}
-                  className="group rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-[0_8px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_50px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                >
-                  <div className="flex gap-4">
+                <Card className="group border border-slate-200 bg-white p-4 text-left shadow-[0_8px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_50px_rgba(15,23,42,0.10)]">
+                  <button
+                    onClick={() => navigate(`/client/events/${ev.id}`)}
+                    className="flex gap-4 w-full text-left"
+                  >
                     <div
                       className="h-20 w-20 shrink-0 rounded-xl border border-slate-200 bg-cover bg-center"
                       style={{ backgroundImage: cover }}
@@ -268,8 +240,8 @@ export const AllEventsListPage = () => {
                         </span>
                       </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                </Card>
               );
             })
           )}
