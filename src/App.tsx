@@ -20,6 +20,7 @@ import { HomePage } from './pages/HomePage';
 import { TicketTransferPage } from './pages/clientPages/TransferPage';
 import { MyTicketsPage } from './pages/clientPages/TicketsPage';
 import { OrdersPage } from './pages/clientPages/OrdersPage';
+import { ResalePage } from './pages/clientPages/ResalePage';
 import DashboardPage from './pages/DashboardPage';
 import { AdminPageLayout } from './shared/AdminLayoutPage';
 import { UsersListPage } from './pages/AdminPages/UsersListPage';
@@ -58,6 +59,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="events" element={<AllEventsListPage />} />
           <Route path="tickets" element={<MyTicketsPage />} />
+          <Route path="resale" element={<ResalePage />} />
           <Route path="transfer-ticket" element={<TicketTransferPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
           <Route path="orders" element={<OrdersPage />} />

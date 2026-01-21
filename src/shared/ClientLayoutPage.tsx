@@ -7,7 +7,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { CreativeCommonsIcon, Menu, Send, Users } from "lucide-react";
+import { CreativeCommonsIcon, Menu, Send, Users, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "CLIENT";
@@ -34,10 +34,14 @@ const items = [
     icon: Send,
   },
   {
-
     name: "Orders",
     path: "/client/orders",
     icon: CreativeCommonsIcon
+  },
+  {
+    name: "Resale",
+    path: "/client/resale",
+    icon: Repeat,
   }
 ];
 
