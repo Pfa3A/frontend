@@ -19,6 +19,7 @@ export type MyEventDto = {
   ticketPrice: number;
   status: EventStatus;
   description: string;
+  imageUrl?: string;
 };
 
 
@@ -50,6 +51,7 @@ export type MyEventDetailsDto = {
   totalSeats: number;
   maxTicketsPerPerson: number;
   status: EventStatus;
+  imageUrl?: string;
   venue: VenueDto;
   organizer: OrganizerDto;
 };

@@ -25,7 +25,7 @@ export const getOrganizerEvents = async (): Promise<MyEventDto[]> => {
     }
 }
 
-export const getEventDetails = async (eventId:string
+export const getEventDetails = async (eventId: string
 ): Promise<EventDetailsDto> => {
     try {
         const id = Number(eventId);
@@ -38,7 +38,7 @@ export const getEventDetails = async (eventId:string
 }
 
 
-export const getEventDetails2 = async (eventId:string
+export const getEventDetails2 = async (eventId: string
 ): Promise<MyEventDetailsDto> => {
     try {
         const id = Number(eventId);
@@ -53,7 +53,7 @@ export const getEventDetails2 = async (eventId:string
 
 export const addVenue = async (venue: CreateVenueDto): Promise<CreatedVenueDto> => {
     try {
-        const response =  await api.post<CreatedVenueDto>("/api/venues", venue);
+        const response = await api.post<CreatedVenueDto>("/api/venues", venue);
         return response.data;
     }
     catch (err: any) {
@@ -61,13 +61,25 @@ export const addVenue = async (venue: CreateVenueDto): Promise<CreatedVenueDto> 
     }
 }
 
-export const createEvent = async (dto: CreateEventDto): Promise<unknown> => {
-  try {
-    const response = await api.post<unknown>("/api/v1/event", dto);
-    return response.data;
-  } catch (err: any) {
-    throw err;
-  }
+export const createEvent = async (dto: CreateEventDto, image?: File): Promise<unknown> => {
+    try {
+        const formData = new FormData();
+        // Wrap the DTO in a Blob with application/json type for the "data" part
+        formData.append("data", JSON.stringify(dto));
+
+        if (image) {
+            formData.append("image", image);
+        }
+
+        const response = await api.post<unknown>("/api/v1/event", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data;
+    } catch (err: any) {
+        throw err;
+    }
 };
 
 export const addDriver = async (user: User): Promise<User> => {

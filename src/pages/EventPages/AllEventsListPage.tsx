@@ -3,6 +3,7 @@ import type { EventDto } from "@/types/event";
 import { Card } from "@/components/Card";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getMediaUrl } from "@/lib/urlUtils";
 
 const PAGE_SIZE = 10;
 
@@ -188,9 +189,9 @@ export const AllEventsListPage = () => {
             </div>
           ) : (
             pagedEvents.map((ev) => {
-              const seed = String(ev.id ?? ev.title);
-              const cover = ev.coverImageUrl
-                ? `url("${ev.coverImageUrl}")`
+              const seed = String(ev.id ?? ev.name);
+              const cover = ev.imageUrl
+                ? `url("${getMediaUrl(ev.imageUrl)}")`
                 : buildCoverGradient(seed);
 
               return (
@@ -208,7 +209,7 @@ export const AllEventsListPage = () => {
                       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                         <div className="min-w-0">
                           <h2 className="truncate text-base font-semibold text-slate-900 group-hover:text-slate-950">
-                            {ev.title}
+                            {ev.name}
                           </h2>
                           <p className="mt-1 text-sm text-slate-600">
                             {formatDateRange(ev.startDate, ev.endDate)}

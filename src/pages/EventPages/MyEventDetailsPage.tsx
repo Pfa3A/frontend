@@ -1,42 +1,8 @@
-import { getEventDetails2 } from "@/services/eventService";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-
-/** =========================
- *  TYPES (Swagger: GET /api/v1/event/me)
- *  ========================= */
-type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
-
-type VenueDto = {
-  id: number;
-  name: string;
-  addressLine1: string;
-  addressLine2?: string | null;
-  city: string;
-  country: string;
-  postalCode?: string | null;
-};
-
-type OrganizerDto = {
-  id: string; // UUID
-  companyName: string;
-  phoneNumber?: string | null;
-  website?: string | null;
-  contactEmail?: string | null;
-};
-
-type MyEventDetailsDto = {
-  id: number;
-  name: string;
-  description: string;
-  date: string; // ISO
-  ticketPrice: number;
-  totalSeats: number;
-  maxTicketsPerPerson: number;
-  status: EventStatus;
-  venue: VenueDto;
-  organizer: OrganizerDto;
-};
+import { getMediaUrl } from "@/lib/urlUtils";
+import { getEventDetails2 } from "@/services/eventService";
+import type { MyEventDetailsDto } from "@/types/Event";
 
 /** =========================
  *  SERVICE (API CALLS)
@@ -48,8 +14,6 @@ async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T
       Accept: "*/*",
       ...(init?.headers || {}),
     },
-    // Si auth via cookies, décommente :
-    // credentials: "include",
   });
 
   if (!res.ok) {
@@ -58,12 +22,6 @@ async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T
 
   return (await res.json()) as T;
 }
-
-const EventService = {
-  getMyEventDetails() {
-    return requestJson<MyEventDetailsDto>("/api/v1/event/me", { method: "GET" });
-  },
-};
 
 /** =========================
  *  UI HELPERS
@@ -105,6 +63,13 @@ function moneyMAD(value?: number) {
   return `${n.toFixed(2)} MAD`;
 }
 
+function buildCoverGradient(seed: string) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
+  const h2 = (h + 24) % 360;
+  return `linear-gradient(135deg, hsl(${h} 72% 92%), hsl(${h2} 72% 96%))`;
+}
+
 /** =========================
  *  PAGE
  *  ========================= */
@@ -112,13 +77,13 @@ export const MyEventDetailsPage = () => {
   const [data, setData] = useState<MyEventDetailsDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-   const { eventId } = useParams<{ eventId: string }>();
+  const { eventId } = useParams<{ eventId: string }>();
 
   const fetchDetails = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const d = await getEventDetails2(eventId);
+      const d = await getEventDetails2(eventId!);
       setData(d);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur s’est produite");
@@ -127,11 +92,9 @@ export const MyEventDetailsPage = () => {
     }
   };
 
- 
-
   useEffect(() => {
     fetchDetails();
-  }, []);
+  }, [eventId]);
 
   const venueLine = useMemo(() => {
     if (!data?.venue) return "Lieu à confirmer";
@@ -227,58 +190,62 @@ export const MyEventDetailsPage = () => {
           </div>
         )}
 
-        {!isLoading && !error && data && (
+        {data && (
           <div className="space-y-6">
-            {/* Carte principale */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-bold text-slate-900">{data.name}</h2>
-                  <p className="mt-2 text-sm text-slate-600">{formatDate(data.date)}</p>
+            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
+              <div
+                className="h-48 w-full bg-cover bg-center"
+                style={{
+                  backgroundImage: data.imageUrl
+                    ? `url("${getMediaUrl(data.imageUrl)}")`
+                    : buildCoverGradient(String(data.id)),
+                }}
+                aria-hidden="true"
+              />
+              <div className="p-6 sm:p-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-bold text-slate-900">{data.name}</h2>
+                    <p className="mt-2 text-sm text-slate-600">{formatDate(data.date)}</p>
+                  </div>
+                  <div className={statusPill(data.status)}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+                    {data.status}
+                  </div>
                 </div>
 
-                <div className={statusPill(data.status)}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
-                  {data.status}
-                </div>
-              </div>
+                <p className="mt-4 text-sm text-slate-700">{data.description}</p>
 
-              <p className="mt-4 text-sm text-slate-700">{data.description}</p>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold text-slate-600">Prix</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">
-                    {moneyMAD(data.ticketPrice)}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold text-slate-600">Places totales</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">
-                    {data.totalSeats}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold text-slate-600">Max / personne</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">
-                    {data.maxTicketsPerPerson}
-                  </p>
+                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-600">Prix</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">
+                      {moneyMAD(data.ticketPrice)}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-600">Places totales</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">
+                      {data.totalSeats}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold text-slate-600">Max / personne</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900">
+                      {data.maxTicketsPerPerson}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Lieu */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h3 className="text-lg font-bold text-slate-900">Lieu</h3>
               <p className="mt-2 text-sm text-slate-700">{venueLine}</p>
             </div>
 
-            {/* Organisateur */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h3 className="text-lg font-bold text-slate-900">Organisateur</h3>
-
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold text-slate-600">Entreprise</p>
@@ -286,21 +253,18 @@ export const MyEventDetailsPage = () => {
                     {data.organizer.companyName}
                   </p>
                 </div>
-
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold text-slate-600">Email de contact</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">
                     {data.organizer.contactEmail ?? "Non renseigné"}
                   </p>
                 </div>
-
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold text-slate-600">Téléphone</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">
                     {data.organizer.phoneNumber ?? "Non renseigné"}
                   </p>
                 </div>
-
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold text-slate-600">Site web</p>
                   <p className="mt-1 text-sm font-bold text-slate-900">

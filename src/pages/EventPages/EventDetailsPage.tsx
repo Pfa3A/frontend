@@ -3,6 +3,7 @@ import { orderTickets } from "@/services/ticket.service";
 import type { EventDetailsDto } from "@/types/event";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getMediaUrl } from "@/lib/urlUtils";
 
 type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
 
@@ -146,7 +147,9 @@ export const EventDetailsPage = () => {
     );
   }
 
-  const cover = buildCoverGradient(String(event.id));
+  const cover = event.imageUrl
+    ? `url("${getMediaUrl(event.imageUrl)}")`
+    : buildCoverGradient(String(event.id));
   const isAvailable = event.status === "ACTIVE";
   const availableSeats = event.totalSeats; // In a real app, subtract sold tickets
 

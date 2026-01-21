@@ -25,6 +25,9 @@ export default function CreateEventPage() {
     maxTicketsPerPerson: 1,
   });
 
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const [venueData, setVenueData] = useState<CreateVenueDto>({
     name: "",
     street: "",
@@ -45,6 +48,18 @@ export default function CreateEventPage() {
   const handleVenueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setVenueData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const validateEvent = () => {
@@ -106,13 +121,13 @@ export default function CreateEventPage() {
         name: eventData.name,
         description: eventData.description,
         date: eventData.date,
-        venueId: createdVenue!.id, // injecté automatiquement
+        venueId: createdVenue!.id,
         ticketPrice: eventData.ticketPrice,
         totalSeats: eventData.totalSeats,
         maxTicketsPerPerson: eventData.maxTicketsPerPerson,
       };
 
-      await createEvent(payload);
+      await createEvent(payload, image || undefined);
 
       setSuccess(true);
       setTimeout(() => {
@@ -124,6 +139,8 @@ export default function CreateEventPage() {
           totalSeats: 0,
           maxTicketsPerPerson: 1,
         });
+        setImage(null);
+        setImagePreview(null);
         setSuccess(false);
       }, 3000);
     } catch (err) {
@@ -321,6 +338,42 @@ export default function CreateEventPage() {
                   />
                 </div>
               </div>
+
+              <div>
+                <label htmlFor="image" className="block text-sm font-semibold text-slate-900">
+                  Image de l’événement
+                </label>
+                <div className="mt-2 flex items-center gap-4">
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="image"
+                    className="cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center transition hover:border-slate-400 hover:bg-slate-100 flex-1"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-2xl">📸</span>
+                      <span className="text-xs font-semibold text-slate-600">
+                        {image ? image.name : "Cliquez pour télécharger une image"}
+                      </span>
+                    </div>
+                  </label>
+                  {imagePreview && (
+                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-200">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -338,7 +391,7 @@ export default function CreateEventPage() {
               </div>
             </div>
 
-          {venueError && (
+            {venueError && (
               <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
                 <p className="text-sm font-semibold text-rose-700">{venueError}</p>
               </div>

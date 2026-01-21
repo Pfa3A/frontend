@@ -2,8 +2,7 @@ export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELLED" | "ENDED" | string
 
 export type EventDto = {
   id: number | string;
-  name:string;
-  title: string;
+  name: string;
   description?: string;
   startDate?: string; // ISO
   endDate?: string; // ISO
@@ -11,7 +10,7 @@ export type EventDto = {
   venueName?: string;
   city?: string;
   country?: string;
-  coverImageUrl?: string | null;
+  imageUrl?: string | null;
 };
 
 export type VenueDto = {
@@ -41,6 +40,7 @@ export type EventDetailsDto = {
   totalSeats: number;
   maxTicketsPerPerson: number;
   status: EventStatus;
+  imageUrl?: string;
   venue: VenueDto;
   organizer: OrganizerDto;
 };
