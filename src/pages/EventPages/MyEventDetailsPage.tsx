@@ -1,27 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMediaUrl } from "@/lib/urlUtils";
-import { getEventDetails2, updateEventStatus } from "@/services/eventService";
-import type { MyEventDetailsDto } from "@/types/Event";
-
-/** =========================
- *  SERVICE (API CALLS)
- *  ========================= */
-async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, {
-    ...init,
-    headers: {
-      Accept: "*/*",
-      ...(init?.headers || {}),
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Erreur API (HTTP ${res.status})`);
-  }
-
-  return (await res.json()) as T;
-}
+import { getEventDetails2, getEventStatistics, updateEventStatus } from "@/services/eventService";
+import type { EventStatisticsDto, MyEventDetailsDto } from "@/types/Event";
+import { TrendingUp, Users, Ticket, Clock, CheckCircle2 } from "lucide-react";
 
 /** =========================
  *  UI HELPERS
@@ -75,6 +57,7 @@ function buildCoverGradient(seed: string) {
  *  ========================= */
 export const MyEventDetailsPage = () => {
   const [data, setData] = useState<MyEventDetailsDto | null>(null);
+  const [stats, setStats] = useState<EventStatisticsDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
@@ -93,6 +76,9 @@ export const MyEventDetailsPage = () => {
     try {
       const d = await getEventDetails2(eventId!);
       setData(d);
+
+      const s = await getEventStatistics(eventId!);
+      setStats(s);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur s’est produite");
     } finally {
@@ -312,6 +298,87 @@ export const MyEventDetailsPage = () => {
 
         {data && (
           <div className="space-y-6">
+            {/* Statistics Dashboard */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm ring-1 ring-blue-50">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <Ticket size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Billets vendus</p>
+                    <p className="text-2xl font-bold text-slate-900">{stats?.totalSoldTickets ?? 0}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                  <span className="font-bold text-blue-600">{stats?.remainingSeats ?? 0}</span> billets restants
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <TrendingUp size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Revenu Total</p>
+                    <p className="text-2xl font-bold text-slate-900">{moneyMAD(stats?.totalRevenue ?? 0)}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                  <span className="font-bold text-emerald-600">Prix unitaire:</span> {moneyMAD(data.ticketPrice)}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm ring-1 ring-amber-50">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                    <Clock size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Réservations</p>
+                    <p className="text-2xl font-bold text-slate-900">{stats?.reservedTickets ?? 0}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                  En attente de paiement
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm ring-1 ring-indigo-50">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <Users size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">File d'attente</p>
+                    <p className="text-2xl font-bold text-slate-900">{stats?.waitlistCount ?? 0}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                  Personnes en attente
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm ring-1 ring-purple-50 sm:col-span-2 lg:col-span-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Taux de présence</p>
+                    <p className="text-2xl font-bold text-slate-900">{(stats?.attendanceRate ?? 0).toFixed(1)}%</p>
+                  </div>
+                </div>
+                <div className="mt-4 h-1.5 w-full rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-purple-600"
+                    style={{ width: `${stats?.attendanceRate ?? 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
             <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
               <div
                 className="h-48 w-full bg-cover bg-center"

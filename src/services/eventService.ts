@@ -145,3 +145,12 @@ export const editDriver = async (user: User): Promise<User> => {
         throw err;
     }
 }
+
+export const getEventStatistics = async (eventId: string | number): Promise<import("@/types/Event").EventStatisticsDto> => {
+    try {
+        const response = await api.get<import("@/types/Event").EventStatisticsDto>(`/api/v1/event/${eventId}/statistics`);
+        return response.data;
+    } catch (err: any) {
+        throw err;
+    }
+};

@@ -79,3 +79,12 @@ export type UpdateEventStatusResponse = {
   newStatus: EventStatus;
   message: string;
 };
+
+export type EventStatisticsDto = {
+  totalSoldTickets: number;
+  totalRevenue: number;
+  remainingSeats: number;
+  reservedTickets: number;
+  waitlistCount: number;
+  attendanceRate: number;
+};
