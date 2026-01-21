@@ -68,3 +68,14 @@ export type MyEventDetailsDto = {
 };
 
 export type EventDetailsDto = MyEventDetailsDto;
+
+export type UpdateEventStatusRequest = {
+  newStatus: EventStatus;
+};
+
+export type UpdateEventStatusResponse = {
+  eventId: number;
+  oldStatus: EventStatus;
+  newStatus: EventStatus;
+  message: string;
+};

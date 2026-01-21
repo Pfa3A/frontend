@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMediaUrl } from "@/lib/urlUtils";
-import { getEventDetails2 } from "@/services/eventService";
+import { getEventDetails2, updateEventStatus } from "@/services/eventService";
 import type { MyEventDetailsDto } from "@/types/Event";
 
 /** =========================
@@ -80,6 +80,13 @@ export const MyEventDetailsPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
 
+  // Status update state
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [statusSuccess, setStatusSuccess] = useState(false);
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+
   const fetchDetails = async () => {
     setIsLoading(true);
     setError(null);
@@ -96,6 +103,38 @@ export const MyEventDetailsPage = () => {
   useEffect(() => {
     fetchDetails();
   }, [eventId]);
+
+  const handleStatusChange = (newStatus: string) => {
+    setPendingStatus(newStatus);
+    setShowStatusConfirm(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!pendingStatus || !eventId) return;
+
+    setIsUpdatingStatus(true);
+    setStatusError(null);
+    setStatusSuccess(false);
+    setShowStatusConfirm(false);
+
+    try {
+      await updateEventStatus(eventId, pendingStatus);
+      setStatusSuccess(true);
+      // Refresh event data
+      await fetchDetails();
+      setTimeout(() => setStatusSuccess(false), 3000);
+    } catch (err) {
+      setStatusError(err instanceof Error ? err.message : "Échec de la mise à jour du statut");
+    } finally {
+      setIsUpdatingStatus(false);
+      setPendingStatus(null);
+    }
+  };
+
+  const cancelStatusChange = () => {
+    setShowStatusConfirm(false);
+    setPendingStatus(null);
+  };
 
   const venueLine = useMemo(() => {
     if (!data?.venue) return "Lieu à confirmer";
@@ -171,7 +210,81 @@ export const MyEventDetailsPage = () => {
             </button>
           </div>
         </div>
+
+        {/* Status Update Section */}
+        {data && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-600">Statut de l'événement</p>
+                <div className="mt-2 flex items-center gap-3">
+                  <div className={statusPill(data.status)}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+                    {data.status}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={data.status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  disabled={isUpdatingStatus}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                  <option value="CANCELLED">CANCELLED</option>
+                  <option value="ENDED">ENDED</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Status feedback messages */}
+            {statusError && (
+              <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-700">
+                ❌ {statusError}
+              </div>
+            )}
+            {statusSuccess && (
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">
+                ✅ Statut mis à jour avec succès
+              </div>
+            )}
+            {isUpdatingStatus && (
+              <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-semibold text-blue-700">
+                ⏳ Mise à jour du statut en cours...
+              </div>
+            )}
+          </div>
+        )}
       </header>
+
+      {/* Confirmation Modal */}
+      {showStatusConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900">Confirmer le changement de statut</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Êtes-vous sûr de vouloir changer le statut de <span className="font-semibold">{data?.status}</span> à{" "}
+              <span className="font-semibold">{pendingStatus}</span> ?
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={cancelStatusChange}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmStatusChange}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto max-w-5xl px-4 pb-12">
         {error && (

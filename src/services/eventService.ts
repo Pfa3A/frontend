@@ -101,6 +101,21 @@ export const updateEvent = async (eventId: number | string, dto: CreateEventDto,
     }
 };
 
+export const updateEventStatus = async (
+    eventId: number | string,
+    newStatus: string
+): Promise<import("@/types/Event").UpdateEventStatusResponse> => {
+    try {
+        const response = await api.patch<import("@/types/Event").UpdateEventStatusResponse>(
+            `/api/v1/event/${eventId}/status`,
+            { newStatus }
+        );
+        return response.data;
+    } catch (err: any) {
+        throw err;
+    }
+};
+
 export const addDriver = async (user: User): Promise<User> => {
     try {
         await api.post("/api/v1/auth/add-driver", user);
