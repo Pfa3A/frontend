@@ -9,6 +9,7 @@ import { EventDetailsPage } from './pages/EventPages/EventDetailsPage';
 import ProfilePage from './pages/clientPages/ProfilePage';
 import { MyEventDetailsPage } from './pages/EventPages/MyEventDetailsPage';
 import { EventsListPage } from './pages/EventPages/EventListPage';
+import UpdateEventPage from './pages/EventPages/UpdateEventPage';
 import { ClientPageLayout } from './shared/ClientLayoutPage';
 import CheckoutForm from './pages/clientPages/PaymentPage';
 import { stripePromise } from './shared/stripe';
@@ -50,6 +51,7 @@ function App() {
           <Route path="events" element={<EventsListPage />} />
           <Route path="create-event" element={<CreateEventPage />} />
           <Route path="events/:eventId" element={<MyEventDetailsPage />} />
+          <Route path="events/:eventId/edit" element={<UpdateEventPage />} />
         </Route>
 
         <Route path='client' element={<ClientPageLayout />}>

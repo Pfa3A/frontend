@@ -1,7 +1,6 @@
 import type { User } from "@/types/user";
 import api from "@/api";
-import type { EventDetailsDto, EventDto } from "@/types/event";
-import type { CreateEventDto, MyEventDetailsDto, MyEventDto } from "@/types/Event";
+import type { CreateEventDto, EventDetailsDto, EventDto, MyEventDetailsDto, MyEventDto } from "@/types/Event";
 import type { CreatedVenueDto, CreateVenueDto } from "@/types/Venue";
 
 
@@ -53,7 +52,7 @@ export const getEventDetails2 = async (eventId: string
 
 export const addVenue = async (venue: CreateVenueDto): Promise<CreatedVenueDto> => {
     try {
-        const response = await api.post<CreatedVenueDto>("/api/venues", venue);
+        const response = await api.post<CreatedVenueDto>("/api/v1/venues", venue);
         return response.data;
     }
     catch (err: any) {
@@ -72,6 +71,26 @@ export const createEvent = async (dto: CreateEventDto, image?: File): Promise<un
         }
 
         const response = await api.post<unknown>("/api/v1/event", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data;
+    } catch (err: any) {
+        throw err;
+    }
+};
+
+export const updateEvent = async (eventId: number | string, dto: CreateEventDto, image?: File): Promise<unknown> => {
+    try {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(dto));
+
+        if (image) {
+            formData.append("image", image);
+        }
+
+        const response = await api.put<unknown>(`/api/v1/event/${eventId}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },

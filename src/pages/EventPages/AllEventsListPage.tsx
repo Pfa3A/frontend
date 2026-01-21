@@ -12,21 +12,16 @@ const PAGE_SIZE = 10;
 // ✅ DONNÉES MOCK (à remplacer plus tard par le backend)
 
 
-function formatDateRange(start?: string, end?: string) {
-  if (!start && !end) return "Date à confirmer";
-  const fmt = (iso: string) =>
-    new Intl.DateTimeFormat(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(iso));
-
-  if (start && end) return `${fmt(start)} · ${fmt(end)}`;
-  if (start) return fmt(start);
-  return fmt(end!);
+function formatDate(iso?: string) {
+  if (!iso) return "Date à confirmer";
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
 }
 
 function statusPill(status?: string) {
@@ -212,7 +207,7 @@ export const AllEventsListPage = () => {
                             {ev.name}
                           </h2>
                           <p className="mt-1 text-sm text-slate-600">
-                            {formatDateRange(ev.startDate, ev.endDate)}
+                            {formatDate(ev.date)}
                           </p>
                         </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getMediaUrl } from "@/lib/urlUtils";
 import { getEventDetails2 } from "@/services/eventService";
 import type { MyEventDetailsDto } from "@/types/Event";
@@ -78,6 +78,7 @@ export const MyEventDetailsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
 
   const fetchDetails = async () => {
     setIsLoading(true);
@@ -150,19 +151,25 @@ export const MyEventDetailsPage = () => {
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
               Mon événement
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Détails depuis <span className="font-semibold">GET /api/v1/event/me</span>
-            </p>
           </div>
 
-          <button
-            type="button"
-            onClick={fetchDetails}
-            disabled={isLoading}
-            className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? "Chargement..." : "Rafraîchir"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(`/organizer/events/${eventId}/edit`)}
+              className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Modifier l'événement
+            </button>
+            <button
+              type="button"
+              onClick={fetchDetails}
+              disabled={isLoading}
+              className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isLoading ? "Chargement..." : "Rafraîchir"}
+            </button>
+          </div>
         </div>
       </header>
 

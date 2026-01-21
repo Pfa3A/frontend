@@ -1,4 +1,4 @@
-import type { CreateEventDto , MyEventDto} from "../types/Event";
+import type { CreateEventDto, MyEventDto } from "../types/Event";
 import type { CreateVenueDto, CreatedVenueDto } from "../types/Venue";
 
 async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
@@ -25,7 +25,7 @@ async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T
 
 export const VenueService = {
   createVenue(dto: CreateVenueDto) {
-    return requestJson<CreatedVenueDto>("/api/venues", {
+    return requestJson<CreatedVenueDto>("/api/v1/venues", {
       method: "POST",
       body: JSON.stringify(dto),
     });

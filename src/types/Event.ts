@@ -1,28 +1,18 @@
-export type CreateEventDto = {
-  name: string;
-  description: string;
-  date: string;
-  venueId: number;
-  ticketPrice: number;
-  totalSeats: number;
-  maxTicketsPerPerson: number;
-};
-
-
 export type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
 
-export type MyEventDto = {
-  id: number;
+export type EventDto = {
+  id: number | string;
   name: string;
-  date: string; // ISO
-  venueName: string;
-  ticketPrice: number;
-  status: EventStatus;
-  description: string;
-  imageUrl?: string;
+  description?: string;
+  date?: string; // ISO
+  status?: EventStatus;
+  venueName?: string;
+  city?: string;
+  country?: string;
+  imageUrl?: string | null;
+  ticketPrice?: number;
+  totalSeats?: number;
 };
-
-
 
 export type VenueDto = {
   id: number;
@@ -42,6 +32,27 @@ export type OrganizerDto = {
   contactEmail?: string | null;
 };
 
+export type CreateEventDto = {
+  name: string;
+  description: string;
+  date: string;
+  venueId: number;
+  ticketPrice: number;
+  totalSeats: number;
+  maxTicketsPerPerson: number;
+};
+
+export type MyEventDto = {
+  id: number;
+  name: string;
+  date: string; // ISO
+  venueName: string;
+  ticketPrice: number;
+  status: EventStatus;
+  description: string;
+  imageUrl?: string;
+};
+
 export type MyEventDetailsDto = {
   id: number;
   name: string;
@@ -55,3 +66,5 @@ export type MyEventDetailsDto = {
   venue: VenueDto;
   organizer: OrganizerDto;
 };
+
+export type EventDetailsDto = MyEventDetailsDto;

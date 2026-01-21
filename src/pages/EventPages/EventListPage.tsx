@@ -3,6 +3,7 @@ import { getOrganizerEvents } from "@/services/eventService";
 import type { MyEventDto } from "@/types/Event";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getMediaUrl } from "@/lib/urlUtils";
 
 const PAGE_SIZE = 10;
 
@@ -161,9 +162,6 @@ export const EventsListPage = () => {
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
               {title}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Liste depuis ton backend : <span className="font-semibold">GET /api/v1/event/me</span>
-            </p>
           </div>
 
           <div className="flex w-full flex-col gap-2 md:w-[520px] md:flex-row md:items-center md:justify-end">
@@ -234,7 +232,9 @@ export const EventsListPage = () => {
           ) : (
             pagedEvents.map((ev) => {
               const seed = String(ev.id ?? ev.name);
-              const cover = buildCoverGradient(seed);
+              const cover = ev.imageUrl
+                ? `url("${getMediaUrl(ev.imageUrl)}")`
+                : buildCoverGradient(seed);
 
               return (
                 <button
