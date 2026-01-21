@@ -20,6 +20,7 @@ import { HomePage } from './pages/HomePage';
 import { TicketTransferPage } from './pages/clientPages/TransferPage';
 import { MyTicketsPage } from './pages/clientPages/TicketsPage';
 import { ReservationsPage } from './pages/clientPages/ReservationsPage';
+import { NotificationsPage } from './pages/clientPages/NotificationsPage';
 import { ResalePage } from './pages/clientPages/ResalePage';
 import DashboardPage from './pages/DashboardPage';
 import { AdminPageLayout } from './shared/AdminLayoutPage';
@@ -63,6 +64,7 @@ function App() {
           <Route path="transfer-ticket" element={<TicketTransferPage />} />
           <Route path="events/:eventId" element={<EventDetailsPage />} />
           <Route path="reservations" element={<ReservationsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route
             path="events/:id/buy-ticket"
             element={<Elements stripe={stripePromise}>

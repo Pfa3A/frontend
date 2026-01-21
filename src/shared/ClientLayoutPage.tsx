@@ -7,7 +7,9 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { CreativeCommonsIcon, Menu, Send, Users, Repeat, CalendarDays } from "lucide-react";
+import { CreativeCommonsIcon, Menu, Send, Users, Repeat, CalendarDays, Bell } from "lucide-react";
+import { getUnreadNotificationsCount } from "@/services/notification.service";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const TITLE = "CLIENT";
@@ -42,11 +44,34 @@ const items = [
     name: "Resale",
     path: "/client/resale",
     icon: Repeat,
+  },
+  {
+    name: "Notifications",
+    path: "/client/notifications",
+    icon: Bell,
   }
 ];
 
 export const ClientPageLayout: React.FC = () => {
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [location.pathname]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return;
+      const user = JSON.parse(userStr);
+      const count = await getUnreadNotificationsCount(user.id);
+      setUnreadCount(count);
+    } catch (err) {
+      console.error("Error fetching unread count:", err);
+    }
+  };
+
 
   return (
     <div className="flex min-h-screen bg-white text-slate-900 relative overflow-hidden">
@@ -82,6 +107,11 @@ export const ClientPageLayout: React.FC = () => {
                     <span className="font-semibold text-sm tracking-tight">
                       {item.name}
                     </span>
+                    {item.name === "Notifications" && unreadCount > 0 && (
+                      <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
