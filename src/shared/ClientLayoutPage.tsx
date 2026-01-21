@@ -7,7 +7,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar";
-import { CreativeCommonsIcon, Menu, Send, Users, Repeat, CalendarDays, Bell } from "lucide-react";
+import { CreativeCommonsIcon, Menu, Users, Repeat, CalendarDays, Bell } from "lucide-react";
 import { getUnreadNotificationsCount } from "@/services/notification.service";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -29,11 +29,6 @@ const items = [
     name: "Tickets",
     path: "/client/tickets",
     icon: Menu,
-  },
-  {
-    name: "Transfer Tickets",
-    path: "/client/transfer-ticket",
-    icon: Send,
   },
   {
     name: "Reservations",
