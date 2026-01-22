@@ -1,4 +1,3 @@
-import { EventService } from "@/services/event.service";
 import { getOrganizerEvents } from "@/services/eventService";
 import type { MyEventDto } from "@/types/Event";
 import React, { useEffect, useMemo, useState } from "react";
@@ -33,10 +32,12 @@ function statusPill(status?: string) {
       return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
     case "CANCELLED":
       return `${base} bg-rose-50 text-rose-700 ring-1 ring-rose-200`;
+    case "SOLD_OUT":
+      return `${base} bg-amber-50 text-amber-700 ring-1 ring-amber-200`;
     case "ENDED":
       return `${base} bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200`;
     default:
-      return `${base} bg-amber-50 text-amber-700 ring-1 ring-amber-200`;
+      return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
   }
 }
 
@@ -62,11 +63,19 @@ export const EventsListPage = () => {
   const pageIndex = currentPage - 1;
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [selectedStatus, setSelectedStatus] = useState(searchParams.get("status") ?? "ALL");
+  const [selectedCity, setSelectedCity] = useState(searchParams.get("city") ?? "ALL");
 
   // ✅ backend data
   const [events, setEvents] = useState<MyEventDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const cities = useMemo(() => {
+    const c = new Set<string>();
+    events.forEach(e => { if (e.city) c.add(e.city); });
+    return Array.from(c).sort();
+  }, [events]);
 
   const fetchEvents = async () => {
     setIsLoading(true);
@@ -87,14 +96,26 @@ export const EventsListPage = () => {
 
   // ✅ Recherche côté client
   const filtered = useMemo(() => {
-    const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-    if (!q) return events;
+    let result = events;
 
-    return events.filter((e) => {
-      const hay = `${e.name} ${e.venueName ?? ""} ${e.status ?? ""}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }, [events, searchParams]);
+    const q = (searchParams.get("q") ?? "").trim().toLowerCase();
+    if (q) {
+      result = result.filter((e) => {
+        const hay = `${e.name} ${e.venueName ?? ""} ${e.city ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    if (selectedStatus !== "ALL") {
+      result = result.filter(e => (e.status ?? "").toUpperCase() === selectedStatus);
+    }
+
+    if (selectedCity !== "ALL") {
+      result = result.filter(e => e.city === selectedCity);
+    }
+
+    return result;
+  }, [events, searchParams, selectedStatus, selectedCity]);
 
   // ✅ Pagination côté client
   const totalElements = filtered.length;
@@ -111,20 +132,28 @@ export const EventsListPage = () => {
 
   function goToPage(p: number) {
     const next = Math.min(Math.max(1, p), totalPages);
-    const q = searchParams.get("q");
-    const sp = new URLSearchParams();
+    const sp = new URLSearchParams(searchParams);
     sp.set("page", String(next));
-    if (q) sp.set("q", q);
     setSearchParams(sp);
   }
 
   function onSubmitSearch(e: React.FormEvent) {
     e.preventDefault();
+    updateParams();
+  }
+
+  function updateParams() {
     const sp = new URLSearchParams();
     sp.set("page", "1");
     if (query.trim()) sp.set("q", query.trim());
+    if (selectedStatus !== "ALL") sp.set("status", selectedStatus);
+    if (selectedCity !== "ALL") sp.set("city", selectedCity);
     setSearchParams(sp);
   }
+
+  useEffect(() => {
+    updateParams();
+  }, [selectedStatus, selectedCity]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -154,42 +183,86 @@ export const EventsListPage = () => {
       </div>
 
       <header className="mx-auto max-w-6xl px-4 pt-10 pb-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold tracking-wide text-slate-500">
-              Billetterie NFT
-            </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-              {title}
-            </h1>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold tracking-wide text-slate-500">
+                Billetterie NFT
+              </p>
+              <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+                {title}
+              </h1>
+            </div>
+
+            <div className="flex w-full flex-col gap-2 md:w-[520px] md:flex-row md:items-center md:justify-end">
+              <form onSubmit={onSubmitSearch} className="w-full">
+                <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] focus-within:ring-2 focus-within:ring-slate-900/5 transition-all">
+                  <span className="select-none text-slate-400">⌕</span>
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Rechercher par nom, lieu…"
+                    className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-[0.99]"
+                  >
+                    Rechercher
+                  </button>
+                </div>
+              </form>
+
+              <button
+                type="button"
+                onClick={fetchEvents}
+                disabled={isLoading}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isLoading ? "Chargement..." : "Rafraîchir"}
+              </button>
+            </div>
           </div>
 
-          <div className="flex w-full flex-col gap-2 md:w-[520px] md:flex-row md:items-center md:justify-end">
-            <form onSubmit={onSubmitSearch} className="w-full">
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
-                <span className="select-none text-slate-400">⌕</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Rechercher par nom, lieu, statut…"
-                  className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                />
-                <button
-                  type="submit"
-                  className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-[0.99]"
-                >
-                  Rechercher
-                </button>
-              </div>
-            </form>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Statut:</span>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-slate-400 transition"
+              >
+                <option value="ALL">Tous les statuts</option>
+                <option value="ACTIVE">Actif</option>
+                <option value="INACTIVE">Inactif</option>
+                <option value="SOLD_OUT">Complet</option>
+                <option value="CANCELLED">Annulé</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ville:</span>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-slate-400 transition"
+              >
+                <option value="ALL">Toutes les villes</option>
+                {cities.map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
 
             <button
-              type="button"
-              onClick={fetchEvents}
-              disabled={isLoading}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                setQuery("");
+                setSelectedStatus("ALL");
+                setSelectedCity("ALL");
+              }}
+              className="ml-auto text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
             >
-              {isLoading ? "Chargement..." : "Rafraîchir"}
+              Réinitialiser les filtres
             </button>
           </div>
         </div>
@@ -275,7 +348,11 @@ export const EventsListPage = () => {
                         </span>
 
                         <span className="rounded-full bg-slate-50 px-3 py-1 ring-1 ring-slate-200">
-                          💰 {Number(ev.ticketPrice ?? 0).toFixed(2)} MAD
+                          🏙️ {ev.city ?? "Ville à confirmer"}
+                        </span>
+
+                        <span className="rounded-full bg-slate-50 px-3 py-1 ring-1 ring-slate-200">
+                          👥 {ev.totalSeats} places
                         </span>
 
                         <span className="ml-auto inline-flex items-center gap-1 font-semibold text-slate-900">

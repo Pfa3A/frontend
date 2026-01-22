@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { type StripeCardElementOptions } from "@stripe/stripe-js";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { buyTickets } from "@/services/ticket.service";
+import { TurnstileCaptcha } from "@/components/TurnstileCaptcha";
 
 export interface PaymentRequest {
   eventId: number;
@@ -13,6 +14,7 @@ export interface PaymentRequest {
   numberOfTickets: number;
   paymentMethodId: string;
   idempotencyKey: string;
+  captchaToken: string;
 }
 
 export interface CreateTicketRequest {
@@ -40,11 +42,10 @@ const CheckoutForm = () => {
   const tickets = Number(searchParams.get("tickets") || "0");
   const price = parseFloat(searchParams.get("price") || "0");
 
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
 
   const cardElementOptions: StripeCardElementOptions = {
     style: {
@@ -80,6 +81,11 @@ const CheckoutForm = () => {
       return;
     }
 
+    if (!captchaToken) {
+      setError("Veuillez compléter la vérification anti-bot.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -87,8 +93,8 @@ const CheckoutForm = () => {
         type: "card",
         card: cardElement,
         billing_details: {
-          name: customerName,
-          email: customerEmail,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
         },
       });
 
@@ -113,6 +119,7 @@ const CheckoutForm = () => {
         method: "CREDIT_CARD",
         paymentMethodId: paymentMethod.id,
         idempotencyKey: crypto.randomUUID(),
+        captchaToken: captchaToken,
       };
 
       const response = await buyTickets(paymentRequest);
@@ -166,7 +173,7 @@ const CheckoutForm = () => {
             Paiement
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Saisissez vos informations et validez votre paiement sécurisé.
+            Vérifiez vos informations et validez votre paiement sécurisé.
           </p>
         </div>
       </header>
@@ -224,32 +231,6 @@ const CheckoutForm = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-900">
-                  Nom complet
-                </label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  required
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#0071BC]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-900">
-                  Adresse e-mail
-                </label>
-                <input
-                  type="email"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  required
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-[#0071BC]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-900">
                   Informations de carte
                 </label>
 
@@ -262,9 +243,30 @@ const CheckoutForm = () => {
                 </p>
               </div>
 
+              {/* Anti-bot Verification */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-slate-900">
+                  Vérification anti-bot
+                </label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-slate-200 bg-slate-50">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">
+                      {captchaToken ? "✓ Vérification réussie" : "Veuillez vérifier que vous n'êtes pas un robot"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Propulsé par Cloudflare Turnstile
+                    </p>
+                  </div>
+                  <TurnstileCaptcha
+                    sitekey="0x4AAAAAACNq7tqpleV1e2bp"
+                    onVerify={setCaptchaToken}
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
-                disabled={!stripe || loading}
+                disabled={!stripe || loading || !captchaToken}
                 className="w-full inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Traitement en cours..." : `Payer ${totalPrice.toFixed(2)} MAD`}

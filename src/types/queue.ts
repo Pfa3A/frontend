@@ -11,4 +11,5 @@ export interface QueueStatusResponse {
     orderId?: string | null; // public order id (when CAN_BUY)
     expiresAt?: string | null;
     reservedTickets?: number | null;
+    imageUrl?: string | null;
 }

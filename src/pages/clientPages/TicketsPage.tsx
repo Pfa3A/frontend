@@ -38,20 +38,7 @@ function formatDate(iso: string) {
   }).format(new Date(iso));
 }
 
-function statusPill(status: string) {
-  const base =
-    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold";
-  switch (status) {
-    case "AVAILABLE":
-      return `${base} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200`;
-    case "USED":
-      return `${base} bg-slate-50 text-slate-700 ring-1 ring-slate-200`;
-    case "EXPIRED":
-      return `${base} bg-rose-50 text-rose-700 ring-1 ring-rose-200`;
-    default:
-      return `${base} bg-amber-50 text-amber-700 ring-1 ring-amber-200`;
-  }
-}
+
 
 
 // ===================================
@@ -79,7 +66,7 @@ const QRCodeDisplay: React.FC<{ ticket: TicketResponse; eventName?: string }> = 
 
   const downloadQRCode = () => {
     if (!qrDataUrl) return;
-    
+
     const link = document.createElement("a");
     link.download = `ticket-${ticket.id}-qr.png`;
     link.href = qrDataUrl;
@@ -262,18 +249,18 @@ export const MyTicketsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<"ALL" | "AVAILABLE" | "USED" | "EXPIRED">("ALL");
 
-  const currentUserId = localStorage.getItem("userId") || "your-user-id";
-const {user,getUser} = useAuth();
+
+  const { user, getUser } = useAuth();
 
   useEffect(() => {
-  getUser();
-}, []);
+    getUser();
+  }, []);
 
-useEffect(() => {
-  if (user?.id) {
-    fetchUserTickets();
-  }
-}, [user]);
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserTickets();
+    }
+  }, [user]);
 
   const fetchUserTickets = async () => {
     setLoading(true);
@@ -320,8 +307,8 @@ useEffect(() => {
     }
   };
 
-  const filteredTickets = filter === "ALL" 
-    ? tickets 
+  const filteredTickets = filter === "ALL"
+    ? tickets
     : tickets.filter(t => t.ticketStatus === filter);
 
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / PAGE_SIZE));
@@ -384,7 +371,7 @@ useEffect(() => {
               <p className="text-xs font-semibold text-slate-600">Utilisés</p>
               <p className="mt-1 text-2xl font-bold text-slate-900">{stats.used}</p>
             </div>
-                        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-[0_8px_30px_rgba(244,63,94,0.06)]">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-[0_8px_30px_rgba(244,63,94,0.06)]">
               <p className="text-xs font-semibold text-rose-700">Expirés</p>
               <p className="mt-1 text-2xl font-bold text-rose-900">{stats.expired}</p>
             </div>
@@ -403,19 +390,18 @@ useEffect(() => {
                 setCurrentPage(1);
               }}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition
-                ${
-                  filter === status
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                ${filter === status
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
             >
               {status === "ALL"
                 ? "Tous"
                 : status === "AVAILABLE"
-                ? "Disponibles"
-                : status === "USED"
-                ? "Utilisés"
-                : "Expirés"}
+                  ? "Disponibles"
+                  : status === "USED"
+                    ? "Utilisés"
+                    : "Expirés"}
             </button>
           ))}
         </div>
@@ -451,10 +437,9 @@ useEffect(() => {
                   <div className="flex items-center justify-between">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold
-                        ${
-                          ticket.ticketStatus === "AVAILABLE"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : ticket.ticketStatus === "USED"
+                        ${ticket.ticketStatus === "AVAILABLE"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : ticket.ticketStatus === "USED"
                             ? "bg-slate-200 text-slate-800"
                             : "bg-rose-100 text-rose-800"
                         }`}
@@ -463,7 +448,7 @@ useEffect(() => {
                     </span>
 
                     <button
-                      onClick={() => navigate(`/events/${ticket.eventId}`)}
+                      onClick={() => navigate(`/client/events/${ticket.eventId}`)}
                       className="text-sm font-semibold text-blue-600 hover:underline"
                     >
                       Voir événement →
@@ -491,10 +476,9 @@ useEffect(() => {
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`h-9 w-9 rounded-lg text-sm font-semibold
-                  ${
-                    currentPage === i + 1
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ${currentPage === i + 1
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 {i + 1}

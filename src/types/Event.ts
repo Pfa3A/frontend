@@ -47,10 +47,12 @@ export type MyEventDto = {
   name: string;
   date: string; // ISO
   venueName: string;
+  city: string;
   ticketPrice: number;
   status: EventStatus;
   description: string;
   imageUrl?: string;
+  totalSeats: number;
 };
 
 export type MyEventDetailsDto = {

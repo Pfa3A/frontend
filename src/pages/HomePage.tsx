@@ -30,7 +30,7 @@ export const HomePage = () => {
 
           <div className="flex flex-wrap gap-4 pt-2">
             <Link
-              to="/events"
+              to="/client/events"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:translate-y-[-2px] transition-all"
             >
               Voir les événements

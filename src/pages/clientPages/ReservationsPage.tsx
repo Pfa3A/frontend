@@ -17,6 +17,7 @@ export interface OrderDto {
   status: string;
   totalPrice: number;
   numberOfTickets: number;
+  imageUrl?: string;
 }
 
 export const ReservationsPage = () => {
@@ -159,9 +160,20 @@ export const ReservationsPage = () => {
                 >
                   <div className="flex flex-col gap-6 md:flex-row">
                     <div
-                      className="h-32 w-full md:h-40 md:w-40 shrink-0 rounded-xl border border-slate-100 bg-cover bg-center"
-                      style={{ backgroundImage: cover }}
-                    />
+                      className="h-32 w-full md:h-40 md:w-40 shrink-0 rounded-xl border border-slate-100 bg-cover bg-center overflow-hidden"
+                      style={{
+                        backgroundImage: q.imageUrl ? `url(${q.imageUrl})` : cover,
+                        backgroundColor: '#f8fafc'
+                      }}
+                    >
+                      {!q.imageUrl && (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <span className="text-2xl font-bold opacity-10">
+                            {q.eventName?.charAt(0) || "E"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 space-y-4">
                       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div>
@@ -224,9 +236,20 @@ export const ReservationsPage = () => {
                 >
                   <div className="flex flex-col gap-6 md:flex-row">
                     <div
-                      className="h-32 w-full md:h-40 md:w-40 shrink-0 rounded-xl border border-slate-100 bg-cover bg-center"
-                      style={{ backgroundImage: cover }}
-                    />
+                      className="h-32 w-full md:h-40 md:w-40 shrink-0 rounded-xl border border-slate-100 bg-cover bg-center overflow-hidden"
+                      style={{
+                        backgroundImage: order.imageUrl ? `url(${order.imageUrl})` : cover,
+                        backgroundColor: '#f8fafc'
+                      }}
+                    >
+                      {!order.imageUrl && (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <span className="text-2xl font-bold opacity-10">
+                            {order.eventTitle?.charAt(0) || "E"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="flex-1 space-y-4">
                       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

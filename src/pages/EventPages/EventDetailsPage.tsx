@@ -1,11 +1,11 @@
 import { getEventDetails } from "@/services/eventService";
 import { orderTickets } from "@/services/ticket.service";
-import type { EventDetailsDto } from "@/types/event";
-import React, { useEffect, useState } from "react";
+import type { EventDetailsDto } from "@/types/Event";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMediaUrl } from "@/lib/urlUtils";
 
-type EventStatus = "ACTIVE" | "INACTIVE" | "CANCELLED" | "ENDED" | string;
+
 
 
 export interface TicketOrderResponse {
@@ -68,6 +68,7 @@ export const EventDetailsPage = () => {
   const { eventId } = useParams<{ eventId: string }>();
 
   const [event, setEvent] = useState<EventDetailsDto | null>(null);
+  const [numTickets, setNumTickets] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,17 +102,33 @@ export const EventDetailsPage = () => {
 
   const handleBuyTicket = async () => {
     if (!event) return;
-    const user = JSON.parse(localStorage.getItem('user') || "{}");
-    console.log("user: ", user);
-    const request: OrderTicketRequest = { eventId: Number(eventId), userId: user.id, numberOfTickets: 1 };
-    const response: TicketOrderResponse = await orderTickets(request);
-    if (response.message === "You can buy your tickets" && response.numberOfTicketsThatCanBeBought > 0 && response.orderId !== null) {
-      navigate(
-        `/client/events/${event.id}/buy-ticket?orderId=${response.orderId}&tickets=${response.numberOfTicketsThatCanBeBought}&price=${event.ticketPrice}`
-      );
-    }
-    // TODO: Navigate to ticket purchase page or open modal
+    try {
+      const userString = localStorage.getItem('user');
+      if (!userString) {
+        navigate('/login');
+        return;
+      }
+      const user = JSON.parse(userString);
+      const request: OrderTicketRequest = {
+        eventId: Number(eventId),
+        userId: user.id,
+        numberOfTickets: numTickets
+      };
 
+      const response: TicketOrderResponse = await orderTickets(request);
+
+      if (response.message === "You can buy your tickets" && response.numberOfTicketsThatCanBeBought > 0 && response.orderId !== null) {
+        navigate(
+          `/client/events/${event.id}/buy-ticket?orderId=${response.orderId}&tickets=${response.numberOfTicketsThatCanBeBought}&price=${event.ticketPrice}`
+        );
+      } else {
+        alert(response.message || "Impossible de commander le billet.");
+      }
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || err.message || "Une erreur est survenue lors de la commande.";
+      alert(errorMsg);
+      console.error("Purchase error:", err);
+    }
   };
 
   if (loading) {
@@ -137,7 +154,7 @@ export const EventDetailsPage = () => {
             {error || "L'événement que vous recherchez n'existe pas."}
           </p>
           <button
-            onClick={() => navigate("/events")}
+            onClick={() => navigate("/client/events")}
             className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
           >
             Retour aux événements
@@ -176,7 +193,7 @@ export const EventDetailsPage = () => {
       {/* Header avec navigation */}
       <header className="mx-auto max-w-6xl px-4 pt-6">
         <button
-          onClick={() => navigate("/events")}
+          onClick={() => navigate("/client/events")}
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition"
         >
           <span>←</span> Retour aux événements
@@ -285,13 +302,46 @@ export const EventDetailsPage = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleBuyTicket}
-                  disabled={!isAvailable}
-                  className="rounded-xl bg-slate-900 px-8 py-4 text-base font-semibold text-white hover:bg-slate-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900 transition"
-                >
-                  {isAvailable ? "Acheter un billet 🎫" : "Billets non disponibles"}
-                </button>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4 bg-white rounded-xl border border-slate-200 p-2 self-end">
+                    <button
+                      onClick={() => setNumTickets(Math.max(1, numTickets - 1))}
+                      className="h-10 w-10 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-600 transition"
+                      disabled={numTickets <= 1}
+                    >
+                      <span className="text-xl">−</span>
+                    </button>
+                    <span className="w-8 text-center font-bold text-slate-900 border-x border-slate-100">
+                      {numTickets}
+                    </span>
+                    <button
+                      onClick={() => setNumTickets(Math.min(event.maxTicketsPerPerson, numTickets + 1))}
+                      className="h-10 w-10 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-600 transition"
+                      disabled={numTickets >= event.maxTicketsPerPerson}
+                    >
+                      <span className="text-xl">+</span>
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between items-center px-2">
+                    <span className="text-sm font-semibold text-slate-600 uppercase tracking-tight">Total</span>
+                    <span className="text-xl font-bold text-slate-900">{formatPrice(numTickets * event.ticketPrice)}</span>
+                  </div>
+
+                  <button
+                    onClick={handleBuyTicket}
+                    disabled={!isAvailable}
+                    className="rounded-xl bg-slate-900 px-8 py-4 text-base font-semibold text-white hover:bg-slate-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900 transition flex items-center justify-center gap-2"
+                  >
+                    {isAvailable ? (
+                      <>
+                        {numTickets > 1 ? `Acheter ${numTickets} billets` : "Acheter un billet"} 🎫
+                      </>
+                    ) : (
+                      "Billets non disponibles"
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
